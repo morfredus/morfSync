@@ -1,21 +1,21 @@
 <#
 .SYNOPSIS
-    Installe (ou met à jour) HomeServerHub en démarrage automatique sous Windows.
+    Installe (ou met à jour) morfSync en démarrage automatique sous Windows.
     Ré-exécuter ce script avec une nouvelle version du binaire = mise à jour :
     la tâche est arrêtée, l'exe remplacé, puis la tâche redémarrée.
 
 .DESCRIPTION
-    HomeServerHub est une application console : plutôt qu'un « vrai » service
+    morfSync est une application console : plutôt qu'un « vrai » service
     Windows (qui exigerait un wrapper externe comme NSSM), ce script utilise le
     Planificateur de tâches intégré pour lancer le hub au démarrage de la
     machine, en arrière-plan, et ouvre le pare-feu sur le port d'écoute.
 
-    Il copie le binaire et la config dans C:\ProgramData\HomeServerHub, crée une
-    tâche planifiée « HomeServerHub » exécutée par le compte SYSTEM, ouvre le
+    Il copie le binaire et la config dans C:\ProgramData\morfsync, crée une
+    tâche planifiée « morfsync » exécutée par le compte SYSTEM, ouvre le
     port dans le pare-feu Windows, puis démarre le hub.
 
 .PARAMETER ExePath
-    Chemin du HomeServerHub.exe compilé. Par défaut : build-mingw\HomeServerHub.exe.
+    Chemin du morfSync.exe compilé. Par défaut : build-mingw\morfSync.exe.
 
 .PARAMETER Uninstall
     Supprime la tâche planifiée et la règle de pare-feu.
@@ -34,9 +34,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$TaskName  = 'HomeServerHub'
-$InstallDir = Join-Path $env:ProgramData 'HomeServerHub'
-$ExeDest    = Join-Path $InstallDir 'HomeServerHub.exe'
+$TaskName  = 'morfsync'
+$InstallDir = Join-Path $env:ProgramData 'morfsync'
+$ExeDest    = Join-Path $InstallDir 'morfSync.exe'
 $ConfDest   = Join-Path $InstallDir 'config.json'
 
 # --- Doit être administrateur --------------------------------------------
@@ -63,7 +63,7 @@ if ($Uninstall) {
 # --- Localiser le binaire -------------------------------------------------
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not $ExePath) {
-    $ExePath = Join-Path $repoRoot 'build-mingw\HomeServerHub.exe'
+    $ExePath = Join-Path $repoRoot 'build-mingw\morfSync.exe'
 }
 if (-not (Test-Path $ExePath)) {
     Write-Error @"
@@ -71,7 +71,7 @@ Binaire introuvable : $ExePath
 Compile d'abord :
     cmake --preset mingw
     cmake --build --preset mingw
-…ou passe le chemin :  .\scripts\windows\install-service.ps1 -ExePath C:\chemin\HomeServerHub.exe
+…ou passe le chemin :  .\scripts\windows\install-service.ps1 -ExePath C:\chemin\morfSync.exe
 "@
     exit 1
 }
@@ -114,7 +114,7 @@ $trigger   = New-ScheduledTaskTrigger -AtStartup
 $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
 $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger `
-    -Principal $principal -Settings $settings -Description 'HomeServerHub — socle de synchronisation' | Out-Null
+    -Principal $principal -Settings $settings -Description 'morfSync — socle de synchronisation' | Out-Null
 Write-Host "Tâche        : '$TaskName' (démarrage automatique, compte SYSTEM)"
 
 # --- Pare-feu : autoriser le port en entrée (indispensable pour le LAN) ---

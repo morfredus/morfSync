@@ -1,4 +1,4 @@
-# HomeServerHub
+# morfSync
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
@@ -7,7 +7,7 @@
 ![Build](https://img.shields.io/badge/CMake-3.21+-064F8C?logo=cmake)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
-**HomeServerHub** is the offline-first synchronization backbone of the *morf*
+**morfSync** is the offline-first synchronization backbone of the *morf*
 ecosystem (ComponentHub, MeteoHub, RaspberryDashboard, SiteWatch…). It is **not**
 a database. Each client keeps its own local copy of the data and works on it
 without any network. The hub only exists to keep every copy consistent on the
@@ -57,7 +57,7 @@ Requires CMake ≥ 3.21, a C++17 compiler and `nlohmann_json`.
 pacman -S mingw-w64-x86_64-nlohmann-json mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
 cmake --preset mingw
 cmake --build --preset mingw
-# -> build-mingw/HomeServerHub.exe
+# -> build-mingw/morfSync.exe
 ```
 
 ### Linux (x86_64) / Raspberry Pi (ARM64, native)
@@ -65,19 +65,19 @@ cmake --build --preset mingw
 sudo apt install nlohmann-json3-dev cmake ninja-build
 cmake --preset linux           # or: --preset linux-arm64 on the Pi itself
 cmake --build --preset linux
-# -> build/HomeServerHub
+# -> build/morfSync
 ```
 
 ### Linux ARM64 (cross-compiled from x86_64)
 ```bash
-export HSH_SYSROOT=/path/to/arm64/sysroot   # must provide nlohmann_json headers
+export MS_SYSROOT=/path/to/arm64/sysroot   # must provide nlohmann_json headers
 cmake --preset linux-arm64-cross
 cmake --build --preset linux-arm64-cross
 ```
 
 ### Run the smoke tests (no network)
 ```bash
-cmake --preset linux -DHSH_BUILD_SMOKE=ON
+cmake --preset linux -DMS_BUILD_SMOKE=ON
 cmake --build --preset linux
 ctest --preset linux
 ```
@@ -86,7 +86,7 @@ ctest --preset linux
 
 ```bash
 cp config.example.json config.json    # then set a token if desired
-./HomeServerHub                       # or: ./HomeServerHub /path/to/config.json
+./morfSync                       # or: ./morfSync /path/to/config.json
 ```
 Quick check: `curl http://localhost:8080/api/health`
 

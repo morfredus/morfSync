@@ -3,7 +3,7 @@
  *
  * Vérifie les invariants du contrat : attribution de seq monotone, last-write-wins
  * par id, détection d'écrasement (conflit), pagination du PULL et persistance.
- * Compilé via l'option CMake HSH_BUILD_SMOKE. Retourne 0 si tout passe.
+ * Compilé via l'option CMake MS_BUILD_SMOKE. Retourne 0 si tout passe.
  */
 
 #include <cassert>

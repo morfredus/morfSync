@@ -1,6 +1,6 @@
-# Installation et configuration de HomeServerHub
+# Installation et configuration de morfSync
 
-Ce document explique comment **installer HomeServerHub en service** (démarrage
+Ce document explique comment **installer morfSync en service** (démarrage
 automatique) sous **Linux** et **Windows**, et comment **configurer l'écoute
 réseau** (adresse + port) sur les deux systèmes.
 
@@ -11,15 +11,15 @@ réseau** (adresse + port) sur les deux systèmes.
 
 ## 0. Prérequis : compiler le binaire
 
-L'installation suppose que `HomeServerHub` (ou `HomeServerHub.exe`) est déjà
+L'installation suppose que `morfSync` (ou `morfSync.exe`) est déjà
 compilé. Si ce n'est pas le cas, voir le [README](../README.md) :
 
 ```bash
 # Linux / Raspberry Pi
-cmake --preset linux   &&  cmake --build --preset linux      # -> build/HomeServerHub
+cmake --preset linux   &&  cmake --build --preset linux      # -> build/morfSync
 
 # Windows (MSYS2/MinGW)
-cmake --preset mingw   &&  cmake --build --preset mingw      # -> build-mingw\HomeServerHub.exe
+cmake --preset mingw   &&  cmake --build --preset mingw      # -> build-mingw\morfSync.exe
 ```
 
 ---
@@ -48,13 +48,13 @@ Windows** :
 
 ### Où sont stockées les données par défaut
 
-Si `dataDir` n'est pas précisé, HomeServerHub choisit l'emplacement attendu par
+Si `dataDir` n'est pas précisé, morfSync choisit l'emplacement attendu par
 le système :
 
 | Système | Emplacement des données |
 |---------|-------------------------|
-| Linux | `~/.local/share/morfredus/HomeServerHub` (ou `$XDG_DATA_HOME/morfredus/HomeServerHub`) |
-| Windows | `%LOCALAPPDATA%\morfredus\HomeServerHub` (ou `%ProgramData%\morfredus\HomeServerHub`) |
+| Linux | `~/.local/share/morfredus/morfSync` (ou `$XDG_DATA_HOME/morfredus/morfSync`) |
+| Windows | `%LOCALAPPDATA%\morfredus\morfSync` (ou `%ProgramData%\morfredus\morfSync`) |
 
 Ces emplacements sont **accessibles à l'utilisateur** (contrairement à
 `/var/lib`). Le service systemd tourne donc **en tant que votre utilisateur**
@@ -70,15 +70,15 @@ Le hub prend le chemin de la config en argument (sinon il cherche `config.json`
 dans le dossier courant) :
 
 ```bash
-./HomeServerHub /chemin/vers/config.json
+./morfSync /chemin/vers/config.json
 ```
 
 ### Où vit la config une fois installée ?
 
 | Système | Emplacement de `config.json` |
 |---------|------------------------------|
-| Linux (service) | `/etc/homeserverhub/config.json` |
-| Windows (tâche)  | `C:\ProgramData\HomeServerHub\config.json` |
+| Linux (service) | `/etc/morfsync/config.json` |
+| Windows (tâche)  | `C:\ProgramData\morfSync\config.json` |
 
 Après modification de la config, **redémarrez** le service (voir plus bas).
 
@@ -95,7 +95,7 @@ sudo ./scripts/linux/install-service.sh
 ```
 
 Le script : installe le binaire dans `/usr/local/bin`, crée
-`/etc/homeserverhub/config.json` (s'il n'existe pas), installe le service,
+`/etc/morfsync/config.json` (s'il n'existe pas), installe le service,
 l'active au démarrage, le lance, et teste `/api/health`.
 
 Désinstallation :
@@ -106,28 +106,28 @@ sudo ./scripts/linux/install-service.sh --uninstall
 ### Méthode manuelle (équivalent, pour comprendre)
 
 ```bash
-sudo install -m 0755 build/HomeServerHub /usr/local/bin/HomeServerHub
-sudo mkdir -p /etc/homeserverhub
-sudo cp config.example.json /etc/homeserverhub/config.json     # puis éditez-le
-sudo cp scripts/linux/homeserverhub.service /etc/systemd/system/
+sudo install -m 0755 build/morfSync /usr/local/bin/morfSync
+sudo mkdir -p /etc/morfsync
+sudo cp config.example.json /etc/morfsync/config.json     # puis éditez-le
+sudo cp scripts/linux/morfsync.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now homeserverhub                       # nom en minuscules
+sudo systemctl enable --now morfsync                       # nom en minuscules
 ```
 
-> ⚠️ Le nom de l'unité systemd est **`homeserverhub`** (tout en minuscules).
-> `systemctl start HomeServerhub` échouera (« Unit not found »).
+> ⚠️ Le nom de l'unité systemd est **`morfsync`** (tout en minuscules).
+> `systemctl start MorfSync` (mauvaise casse) échouera (« Unit not found »).
 
-Le service tourne sous un utilisateur dédié (`DynamicUser`) ; ses données vont
-dans `/var/lib/homeserverhub/`. Réglez donc `"dataDir": "/var/lib/homeserverhub/data"`
-dans la config (le script d'installation le fait automatiquement).
+Le service tourne **en tant que votre utilisateur** (`User=`) ; ses données vont
+dans `~/.local/share/morfredus/morfSync` (voir §1). `install-service.sh` injecte
+l'utilisateur et son home automatiquement.
 
 ### Piloter le service
 
 ```bash
-systemctl status homeserverhub          # état
-sudo systemctl restart homeserverhub    # après modification de config.json
-sudo systemctl stop homeserverhub       # arrêter
-journalctl -u homeserverhub -e          # journaux (diagnostic)
+systemctl status morfsync          # état
+sudo systemctl restart morfsync    # après modification de config.json
+sudo systemctl stop morfsync       # arrêter
+journalctl -u morfsync -e          # journaux (diagnostic)
 ```
 
 ### Mettre à jour le binaire
@@ -143,7 +143,7 @@ sudo ./scripts/linux/update-service.sh --build
 
 `--build` fait tout : `git pull`, **reconstruction propre** (`rm -rf` du dossier
 de build puis compilation, en tant que l'utilisateur), puis arrêt du service,
-remplacement de `/usr/local/bin/HomeServerHub` et redémarrage. Le script affiche
+remplacement de `/usr/local/bin/morfSync` et redémarrage. Le script affiche
 la version du nouveau binaire et la transition (ex. `0.2.5 -> 0.2.6`).
 
 Le **preset est auto-détecté** selon l'architecture : `linux-arm64` sur un
@@ -161,7 +161,7 @@ Sur **Raspberry Pi 64 bits**, utiliser le preset `linux-arm64` (dossier
 `build-arm64`) ; sur un PC x86_64, `linux` (dossier `build`). Exemple pour le Pi :
 
 ```bash
-cd ~/Codage/Apps/HomeServerHub               # adapter au chemin du dépôt
+cd ~/Codage/Apps/morfSync               # adapter au chemin du dépôt
 
 git pull                                     # 1. récupérer le code
 cat VERSION                                  # 2. confirmer la nouvelle version
@@ -170,11 +170,11 @@ rm -rf build-arm64                           # 3. build NEUF (étape indispensab
 cmake --preset linux-arm64
 cmake --build --preset linux-arm64
 
-./build-arm64/HomeServerHub --version        # 4. vérifier la version compilée
+./build-arm64/morfSync --version        # 4. vérifier la version compilée
 
-sudo systemctl stop homeserverhub            # 5. remplacer le binaire du service
-sudo install -m 0755 build-arm64/HomeServerHub /usr/local/bin/HomeServerHub
-sudo systemctl restart homeserverhub
+sudo systemctl stop morfsync            # 5. remplacer le binaire du service
+sudo install -m 0755 build-arm64/morfSync /usr/local/bin/morfSync
+sudo systemctl restart morfsync
 
 curl http://localhost:8080/api/health        # 6. vérifier la version en service
 ```
@@ -186,8 +186,8 @@ curl http://localhost:8080/api/health        # 6. vérifier la version en servic
 > serait recopié tel quel (version inchangée). Un dossier `build/` neuf force la
 > réintégration du numéro de version.
 >
-> **Vérifier la version** avec `HomeServerHub --version` (fiable) plutôt qu'en
-> cherchant une chaîne dans le binaire : « HomeServerHub » et le numéro y sont
+> **Vérifier la version** avec `morfSync --version` (fiable) plutôt qu'en
+> cherchant une chaîne dans le binaire : « morfSync » et le numéro y sont
 > stockés séparément.
 
 ### Pare-feu Linux
@@ -201,7 +201,7 @@ sudo ufw allow 8080/tcp
 
 ## 3. Installation sous Windows (démarrage automatique)
 
-HomeServerHub est une application **console**. Windows n'a pas de « vrai service »
+morfSync est une application **console**. Windows n'a pas de « vrai service »
 prêt à l'emploi pour ce type de programme sans outil externe (comme NSSM). On
 utilise donc le **Planificateur de tâches** intégré : le hub démarre
 automatiquement à l'allumage de la machine, en arrière-plan.
@@ -216,8 +216,8 @@ automatiquement à l'allumage de la machine, en arrière-plan.
 .\scripts\windows\install-service.ps1
 ```
 
-Le script : copie le binaire et la config dans `C:\ProgramData\HomeServerHub`,
-crée une tâche planifiée **`HomeServerHub`** (démarrage automatique, compte
+Le script : copie le binaire et la config dans `C:\ProgramData\morfSync`,
+crée une tâche planifiée **`morfSync`** (démarrage automatique, compte
 SYSTEM), **ouvre le port dans le pare-feu Windows**, démarre le hub et teste
 `/api/health`.
 
@@ -229,11 +229,11 @@ Désinstallation :
 ### Piloter la tâche
 
 ```powershell
-Get-ScheduledTask -TaskName HomeServerHub | Get-ScheduledTaskInfo   # état
-Stop-ScheduledTask  -TaskName HomeServerHub                          # arrêter
-Start-ScheduledTask -TaskName HomeServerHub                          # (re)démarrer
+Get-ScheduledTask -TaskName morfSync | Get-ScheduledTaskInfo   # état
+Stop-ScheduledTask  -TaskName morfSync                          # arrêter
+Start-ScheduledTask -TaskName morfSync                          # (re)démarrer
 ```
-Après avoir modifié `C:\ProgramData\HomeServerHub\config.json`, arrêtez puis
+Après avoir modifié `C:\ProgramData\morfSync\config.json`, arrêtez puis
 redémarrez la tâche.
 
 ### Pare-feu Windows
@@ -241,7 +241,7 @@ redémarrez la tâche.
 Le script d'installation ouvre automatiquement le port (profils Privé + Domaine).
 Pour le faire manuellement :
 ```powershell
-New-NetFirewallRule -DisplayName "HomeServerHub" -Direction Inbound `
+New-NetFirewallRule -DisplayName "morfSync" -Direction Inbound `
     -Action Allow -Protocol TCP -LocalPort 8080 -Profile Private,Domain
 ```
 

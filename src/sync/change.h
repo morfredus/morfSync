@@ -1,7 +1,7 @@
 /**
  * change.h — L'enveloppe de synchronisation.
  *
- * HomeServerHub est volontairement AGNOSTIQUE au métier : il ne connaît ni les
+ * morfSync est volontairement AGNOSTIQUE au métier : il ne connaît ni les
  * composants de ComponentHub, ni les mesures de MeteoHub. Il ne manipule que
  * cette enveloppe (voir docs/sync-contract.md, §1). La charge utile métier
  * ("data") reste un JSON opaque que le hub transporte sans l'interpréter.

@@ -1,20 +1,22 @@
-# Service systemd pour HomeServerHub.
+# Service systemd pour morfSync.
 #
 # Le service tourne EN TANT QUE L'UTILISATEUR (User=/Group=), pour que ses
-# données restent accessibles dans ~/.local/share/morfredus/HomeServerHub
+# données restent accessibles dans ~/.local/share/morfredus/morfSync
 # (et non dans /var/lib, réservé au root). Le script install-service.sh
 # remplace __RUN_USER__ et __RUN_HOME__ ; en installation manuelle, remplacez-les
 # vous-même (utilisateur + son répertoire home).
 #
+# Nom d'unité : « morfsync ». Config dans /etc/morfsync.
+#
 # Installation manuelle :
-#   sudo cp HomeServerHub /usr/local/bin/
-#   sudo mkdir -p /etc/homeserverhub && sudo cp config.example.json /etc/homeserverhub/config.json
+#   sudo cp morfSync /usr/local/bin/
+#   sudo mkdir -p /etc/morfsync && sudo cp config.example.json /etc/morfsync/config.json
 #   sed -e 's/__RUN_USER__/votreuser/g' -e 's#__RUN_HOME__#/home/votreuser#g' \
-#       scripts/linux/homeserverhub.service | sudo tee /etc/systemd/system/homeserverhub.service
-#   sudo systemctl daemon-reload && sudo systemctl enable --now homeserverhub
+#       scripts/linux/morfsync.service | sudo tee /etc/systemd/system/morfsync.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now morfsync
 
 [Unit]
-Description=HomeServerHub — socle de synchronisation offline-first
+Description=morfSync — socle de synchronisation offline-first
 After=network-online.target
 Wants=network-online.target
 
@@ -27,7 +29,7 @@ Group=__RUN_USER__
 # Sans ça, le hub ne résout pas son dossier de données et plante (SIGABRT).
 Environment=HOME=__RUN_HOME__
 WorkingDirectory=__RUN_HOME__
-ExecStart=/usr/local/bin/HomeServerHub /etc/homeserverhub/config.json
+ExecStart=/usr/local/bin/morfSync /etc/morfsync/config.json
 Restart=on-failure
 RestartSec=3
 NoNewPrivileges=yes

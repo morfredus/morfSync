@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# update-service.sh — Met à jour le binaire du service HomeServerHub (Linux).
+# update-service.sh — Met à jour le binaire du service morfSync (Linux).
 #
-# Remplace /usr/local/bin/HomeServerHub par une nouvelle version et redémarre le
+# Remplace /usr/local/bin/morfSync par une nouvelle version et redémarre le
 # service, sans toucher à la configuration ni aux données. Complément de
 # install-service.sh (à utiliser pour la première installation).
 #
@@ -10,16 +10,16 @@
 #   sudo ./scripts/linux/update-service.sh                    # utilise build/ (ou build-arm64/)
 #   sudo ./scripts/linux/update-service.sh --build            # git pull + build neuf (preset auto)
 #   sudo ./scripts/linux/update-service.sh --build linux-arm64 # forcer un preset
-#   sudo ./scripts/linux/update-service.sh /chemin/vers/HomeServerHub
+#   sudo ./scripts/linux/update-service.sh /chemin/vers/morfSync
 #
 # --build auto-détecte le preset : linux-arm64 sur un Pi 64 bits, linux sinon.
 # Flux typique sur le Pi :  sudo ./scripts/linux/update-service.sh --build
 
 set -euo pipefail
 
-SERVICE_NAME="homeserverhub"
-BIN_DEST="/usr/local/bin/HomeServerHub"
-CONF_DEST="/etc/homeserverhub/config.json"
+SERVICE_NAME="morfsync"
+BIN_DEST="/usr/local/bin/morfSync"
+CONF_DEST="/etc/morfsync/config.json"
 UNIT_DEST="/etc/systemd/system/$SERVICE_NAME.service"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -62,20 +62,20 @@ if [[ "${1:-}" == "--build" ]]; then
     esac
     echo "Mise à jour du code + recompilation propre (preset $PRESET, utilisateur $RUN_USER)…"
     sudo -u "$RUN_USER" bash -c "cd '$REPO_ROOT' && git pull --ff-only && rm -rf '$BUILD_DIR' && cmake --preset '$PRESET' && cmake --build --preset '$PRESET'"
-    BIN_SRC="$REPO_ROOT/$BUILD_DIR/HomeServerHub"
+    BIN_SRC="$REPO_ROOT/$BUILD_DIR/morfSync"
 elif [[ -n "${1:-}" ]]; then
     BIN_SRC="$1"
 fi
 
 # --- Localiser le binaire si non fourni ----------------------------------
 if [[ -z "$BIN_SRC" ]]; then
-    for candidate in "$REPO_ROOT/build/HomeServerHub" "$REPO_ROOT/build-arm64/HomeServerHub"; do
+    for candidate in "$REPO_ROOT/build/morfSync" "$REPO_ROOT/build-arm64/morfSync"; do
         if [[ -x "$candidate" ]]; then BIN_SRC="$candidate"; break; fi
     done
 fi
 if [[ -z "$BIN_SRC" || ! -f "$BIN_SRC" ]]; then
     echo "Binaire introuvable. Compile d'abord (cmake --preset linux && cmake --build --preset linux)" >&2
-    echo "ou passe le chemin :  sudo $0 /chemin/vers/HomeServerHub" >&2
+    echo "ou passe le chemin :  sudo $0 /chemin/vers/morfSync" >&2
     exit 1
 fi
 echo "Nouveau binaire : $BIN_SRC  [$("$BIN_SRC" --version 2>/dev/null || echo 'version ?')]"

@@ -1,5 +1,5 @@
 /**
- * main.cpp — HomeServerHub : point d'entrée.
+ * main.cpp — morfSync : point d'entrée.
  *
  * Câble les endpoints du contrat de synchronisation (docs/sync-contract.md §4)
  * au serveur HTTP minimal et au journal de changements. Le hub reste agnostique
@@ -23,8 +23,8 @@
 #include "app/config.h"
 #include "app/paths.h"
 
-#ifndef HSH_VERSION
-#define HSH_VERSION "0.0.0"
+#ifndef MS_VERSION
+#define MS_VERSION "0.0.0"
 #endif
 
 using nlohmann::json;
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
     if (argc > 1) {
         const std::string a1 = argv[1];
         if (a1 == "--version" || a1 == "-v") {
-            std::cout << "HomeServerHub " << HSH_VERSION << std::endl;
+            std::cout << "morfSync " << MS_VERSION << std::endl;
             return 0;
         }
     }
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
     hsh::Config cfg;
     std::string cfgError;
     if (!hsh::Config::loadFromFile(configPath, cfg, cfgError)) {
-        std::cerr << "[HomeServerHub] " << cfgError << "\n";
+        std::cerr << "[morfSync] " << cfgError << "\n";
         return 1;
     }
 
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
         { std::ofstream t(probe); writable = t.good(); }
         std::error_code rm; std::filesystem::remove(probe, rm);
         if (!writable) {
-            std::cerr << "[HomeServerHub] dossier de données inaccessible en écriture : "
+            std::cerr << "[morfSync] dossier de données inaccessible en écriture : "
                       << cfg.dataDir;
             if (ec) std::cerr << " (" << ec.message() << ")";
             std::cerr << "\n  Corrigez \"dataDir\" dans " << configPath
@@ -166,13 +166,13 @@ int main(int argc, char** argv) {
 
     // --- GET /api/health : état du serveur (ouvert, sans auth) --------------
     server.route("GET", "/api/health", [](const hsh::HttpRequest&) {
-        json body{{"status", "ok"}, {"time", nowIso8601Utc()}, {"version", HSH_VERSION}};
+        json body{{"status", "ok"}, {"time", nowIso8601Utc()}, {"version", MS_VERSION}};
         return hsh::HttpResponse::json(200, body.dump());
     });
 
     // --- GET /api/status : domaines connus + nb d'entités + curseur ---------
     server.route("GET", "/api/status", [&registry](const hsh::HttpRequest&) {
-        json body{{"status", "ok"}, {"time", nowIso8601Utc()}, {"version", HSH_VERSION},
+        json body{{"status", "ok"}, {"time", nowIso8601Utc()}, {"version", MS_VERSION},
                   {"domains", registry.statusJson()}};
         return hsh::HttpResponse::json(200, body.dump());
     });
@@ -234,14 +234,14 @@ int main(int argc, char** argv) {
         return hsh::HttpResponse::json(200, body.dump());
     });
 
-    std::cout << "HomeServerHub " << HSH_VERSION
+    std::cout << "morfSync " << MS_VERSION
               << " — écoute sur http://" << cfg.host << ":" << cfg.port << "\n"
               << "  données   : " << std::filesystem::absolute(cfg.dataDir).string() << "\n"
               << "  domaines  : " << preloaded << " chargé(s) au démarrage\n"
               << "  auth      : " << (cfg.token.empty() ? "désactivée" : "Bearer") << std::endl;
 
     if (!server.run()) {
-        std::cerr << "[HomeServerHub] impossible d'ouvrir le port " << cfg.port
+        std::cerr << "[morfSync] impossible d'ouvrir le port " << cfg.port
                   << " (déjà utilisé ?)\n";
         return 1;
     }

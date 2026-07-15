@@ -1,13 +1,13 @@
-# HomeServerHub — Guide du débutant
+# morfSync — Guide du débutant
 
 Ce guide vous prend **par la main, de zéro**, pour faire fonctionner
-HomeServerHub et vérifier qu'une machine peut communiquer avec lui sur votre
+morfSync et vérifier qu'une machine peut communiquer avec lui sur votre
 réseau. Aucune connaissance préalable n'est supposée. Suivez les étapes dans
 l'ordre.
 
 ---
 
-## C'est quoi, HomeServerHub ?
+## C'est quoi, morfSync ?
 
 C'est un **petit serveur** qui tourne en permanence sur une machine de votre
 maison (un Raspberry Pi, un PC toujours allumé…). Son rôle : servir de **point
@@ -64,7 +64,7 @@ Notez, on en aura besoin :
 
 ---
 
-## Étape 2 — Récupérer et compiler HomeServerHub
+## Étape 2 — Récupérer et compiler morfSync
 
 Sur la machine hub, ouvrez un terminal et placez-vous dans le dépôt.
 
@@ -74,14 +74,14 @@ sudo apt install nlohmann-json3-dev cmake ninja-build   # une seule fois
 cmake --preset linux
 cmake --build --preset linux
 ```
-Résultat : un fichier `build/HomeServerHub`.
+Résultat : un fichier `build/morfSync`.
 
 **Sur Windows (avec MSYS2/MinGW installé) :**
 ```bash
 cmake --preset mingw
 cmake --build --preset mingw
 ```
-Résultat : un fichier `build-mingw\HomeServerHub.exe`.
+Résultat : un fichier `build-mingw\morfSync.exe`.
 
 > Si la compilation se plaint de `nlohmann_json` introuvable, c'est la seule
 > dépendance à installer (paquet ci-dessus sous Linux ; `pacman -S
@@ -97,17 +97,17 @@ qu'il démarre.
 **Linux :**
 ```bash
 cd build
-./HomeServerHub
+./morfSync
 ```
 **Windows :**
 ```powershell
 cd build-mingw
-.\HomeServerHub.exe
+.\morfSync.exe
 ```
 
 Vous devez voir une ligne comme :
 ```
-HomeServerHub 0.1.0 — écoute sur http://0.0.0.0:8080 (données: data, auth: désactivée)
+morfSync 0.1.0 — écoute sur http://0.0.0.0:8080 (données: data, auth: désactivée)
 ```
 🎉 Le hub tourne. **Laissez ce terminal ouvert** et ouvrez-en un **second** pour
 la suite.
@@ -190,16 +190,16 @@ Vous devez retrouver votre composant « Test depuis le portable ».
 ## Étape 6 — Régler le port ou ajouter un mot de passe (facultatif)
 
 Ouvrez le fichier `config.json` :
-- Linux : `/etc/homeserverhub/config.json`
-- Windows : `C:\ProgramData\HomeServerHub\config.json`
+- Linux : `/etc/morfsync/config.json`
+- Windows : `C:\ProgramData\morfSync\config.json`
 
 Changez par exemple le port, ou ajoutez un jeton :
 ```json
 { "host": "0.0.0.0", "port": 8080, "token": "un-mot-de-passe-partage" }
 ```
 Puis **redémarrez** :
-- Linux : `sudo systemctl restart homeserverhub`
-- Windows : `Stop-ScheduledTask -TaskName HomeServerHub ; Start-ScheduledTask -TaskName HomeServerHub`
+- Linux : `sudo systemctl restart morfsync`
+- Windows : `Stop-ScheduledTask -TaskName morfSync ; Start-ScheduledTask -TaskName morfSync`
 
 Si vous mettez un `token`, les clients devront ajouter l'en-tête
 `-H "Authorization: Bearer un-mot-de-passe-partage"` à leurs requêtes (sauf
@@ -211,11 +211,11 @@ Si vous mettez un `token`, les clients devront ajouter l'en-tête
 
 | Symptôme | Cause probable | Solution |
 |----------|----------------|----------|
-| `Unit HomeServerhub.service not found` (Linux) | Mauvaise casse ou service non installé | Le nom est **`homeserverhub`** (minuscules). Relancez `sudo ./scripts/linux/install-service.sh`. |
+| `Unit morfSync.service not found` (Linux) | Mauvaise casse ou service non installé | Le nom est **`morfsync`** (minuscules). Relancez `sudo ./scripts/linux/install-service.sh`. |
 | `localhost:8080` marche, mais **pas** depuis un autre poste | Pare-feu qui bloque le port | Windows : relancez le script en admin (il ouvre le pare-feu). Linux : `sudo ufw allow 8080/tcp`. |
 | Un autre poste ne répond pas | Mauvaise IP, ou `host` mis à `127.0.0.1` | Vérifiez l'IP (`hostname -I` / `ipconfig`) et que `config.json` a `"host": "0.0.0.0"`. |
 | `impossible d'ouvrir le port 8080 (déjà utilisé ?)` | Un autre programme (ou un 2ᵉ hub) occupe le port | Changez le `port` dans `config.json`, ou fermez l'autre programme. |
-| Rien ne s'affiche / démarrage silencieux | En mode service, la sortie va dans les journaux | Linux : `journalctl -u homeserverhub -e`. Windows : `Get-ScheduledTask -TaskName HomeServerHub | Get-ScheduledTaskInfo`. |
+| Rien ne s'affiche / démarrage silencieux | En mode service, la sortie va dans les journaux | Linux : `journalctl -u morfsync -e`. Windows : `Get-ScheduledTask -TaskName morfSync | Get-ScheduledTaskInfo`. |
 | La compilation échoue sur `nlohmann_json` | Dépendance manquante | Linux : `sudo apt install nlohmann-json3-dev`. MSYS2 : `pacman -S mingw-w64-x86_64-nlohmann-json`. |
 
 ---

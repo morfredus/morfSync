@@ -1,4 +1,4 @@
-# HomeServerHub
+# morfSync
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
@@ -7,7 +7,7 @@
 ![Build](https://img.shields.io/badge/CMake-3.21+-064F8C?logo=cmake)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
-**HomeServerHub** est le socle de synchronisation *offline-first* de l'écosystème
+**morfSync** est le socle de synchronisation *offline-first* de l'écosystème
 *morf* (ComponentHub, MeteoHub, RaspberryDashboard, SiteWatch…). Ce n'est **pas**
 une base de données. Chaque client garde sa propre copie locale des données et
 travaille dessus sans réseau. Le hub ne sert qu'à maintenir toutes les copies
@@ -58,7 +58,7 @@ Nécessite CMake ≥ 3.21, un compilateur C++17 et `nlohmann_json`.
 pacman -S mingw-w64-x86_64-nlohmann-json mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
 cmake --preset mingw
 cmake --build --preset mingw
-# -> build-mingw/HomeServerHub.exe
+# -> build-mingw/morfSync.exe
 ```
 
 ### Linux (x86_64) / Raspberry Pi (ARM64, natif)
@@ -66,19 +66,19 @@ cmake --build --preset mingw
 sudo apt install nlohmann-json3-dev cmake ninja-build
 cmake --preset linux           # ou : --preset linux-arm64 directement sur le Pi
 cmake --build --preset linux
-# -> build/HomeServerHub
+# -> build/morfSync
 ```
 
 ### Linux ARM64 (croisé depuis x86_64)
 ```bash
-export HSH_SYSROOT=/chemin/vers/sysroot/arm64   # doit fournir les en-têtes nlohmann_json
+export MS_SYSROOT=/chemin/vers/sysroot/arm64   # doit fournir les en-têtes nlohmann_json
 cmake --preset linux-arm64-cross
 cmake --build --preset linux-arm64-cross
 ```
 
 ### Lancer les tests de fumée (sans réseau)
 ```bash
-cmake --preset linux -DHSH_BUILD_SMOKE=ON
+cmake --preset linux -DMS_BUILD_SMOKE=ON
 cmake --build --preset linux
 ctest --preset linux
 ```
@@ -87,7 +87,7 @@ ctest --preset linux
 
 ```bash
 cp config.example.json config.json    # puis renseigner un token si souhaité
-./HomeServerHub                       # ou : ./HomeServerHub /chemin/config.json
+./morfSync                       # ou : ./morfSync /chemin/config.json
 ```
 Vérification rapide : `curl http://localhost:8080/api/health`
 

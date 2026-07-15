@@ -1,10 +1,27 @@
 # Changelog
 
-Toutes les évolutions notables de HomeServerHub sont consignées ici.
+Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
+
+## [0.2.8] — 2026-07-15
+### Modifié — renommage HomeServerHub → morfSync
+
+Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…).
+- **Produit / binaire / cible CMake** : `morfSync` (le binaire s'appelle désormais `morfSync`).
+- **Service systemd** : `morfsync` (minuscules) ; config dans **`/etc/morfsync`**
+  (`install-service.sh` migre automatiquement depuis `/etc/homeserverhub`).
+- **Dossier de données** : `~/.local/share/morfredus/morfSync` (Linux) /
+  `%LOCALAPPDATA%\morfredus\morfSync` (Windows).
+- **Tâche + dossier Windows** : `morfsync` / `C:\ProgramData\morfsync`.
+- **Dépôt GitHub** : `HomeServerHub_travail` → `morfSync_travail`.
+
+> Migration : désinstaller l'ancien service `homeserverhub` (voir notes), puis
+> relancer `install-service.sh` (la config est récupérée automatiquement). Le
+> dossier de données change de nom : la détection d'époque (0.2.5) fait que les
+> clients se re-synchronisent tout seuls.
 
 ## [0.2.7] — 2026-07-15
 ### Corrigé
@@ -53,7 +70,7 @@ versionnage [SemVer](https://semver.org/lang/fr/).
   boucle), le serveur vérifie que `dataDir` est créable et **inscriptible** au
   démarrage, et sort proprement avec un message clair sinon.
 - `install-service.sh` **migre** une config héritée : un `dataDir` pointant vers
-  `/var/lib/homeserverhub` (ancien service `DynamicUser`, inaccessible au compte
+  `/var/lib/morfsync` (ancien service `DynamicUser`, inaccessible au compte
   utilisateur) est retiré automatiquement → emplacement par défaut dans le home.
   C'était la cause du service qui démarrait puis s'arrêtait après passage en
   `User=`.
@@ -68,17 +85,17 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 - `scripts/windows/install-service.ps1` fait aussi office de **mise à jour** :
   ré-exécuté, il arrête la tâche pour libérer l'exe, le remplace, puis redémarre.
 - Windows : les données vont dans un dossier **accessible** (`dataDir` explicite
-  sous `%ProgramData%\HomeServerHub\data`) au lieu du profil caché du compte
+  sous `%ProgramData%\morfSync\data`) au lieu du profil caché du compte
   SYSTEM.
 
 ## [0.2.1] — 2026-07-15
 ### Modifié
 - **Dossier de données par défaut accessible à l'utilisateur.** Auparavant, le
   service systemd (`DynamicUser` + `StateDirectory`) écrivait dans
-  `/var/lib/homeserverhub`, inaccessible à l'utilisateur. Désormais les données
+  `/var/lib/morfsync`, inaccessible à l'utilisateur. Désormais les données
   vont, par défaut, dans un emplacement standard **sous le home de l'utilisateur** :
-  - Linux : `~/.local/share/morfredus/HomeServerHub` (XDG) ;
-  - Windows : `%LOCALAPPDATA%\morfredus\HomeServerHub`.
+  - Linux : `~/.local/share/morfredus/morfSync` (XDG) ;
+  - Windows : `%LOCALAPPDATA%\morfredus\morfSync`.
   Le service systemd tourne maintenant **en tant que l'utilisateur** (`User=`),
   plus en `DynamicUser` ; `install-service.sh` injecte l'utilisateur courant et
   pré-crée le dossier. (`dataDir` explicite dans `config.json` reste prioritaire.)
@@ -87,7 +104,7 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 ### Ajouté
 - Stockage des données à l'emplacement conforme à l'OS quand `dataDir` n'est pas
   précisé : `$STATE_DIRECTORY` (service systemd) puis XDG sous Linux,
-  `%ProgramData%\HomeServerHub` sous Windows (`src/app/paths.*`).
+  `%ProgramData%\morfSync` sous Windows (`src/app/paths.*`).
 - Préchargement des journaux existants au démarrage (les données survivent aux
   redémarrages, reflétées immédiatement) et journal de démarrage détaillé (flushé).
 - Endpoint `GET /api/status` : domaines connus, nombre d'entités, curseur `lastSeq`.
@@ -119,17 +136,18 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 - Authentification optionnelle par jeton partagé (`Bearer`).
 - Profils de compilation win-x64 / Linux / ARM64 (natif et croisé), alignés sur
   ComponentHub (CMake + presets + toolchain aarch64).
-- Test de fumée headless du journal (option `HSH_BUILD_SMOKE`).
+- Test de fumée headless du journal (option `MS_BUILD_SMOKE`).
 - Contrat de synchronisation versionné dans `docs/sync-contract.md`.
 - Service systemd et README bilingue (EN/FR).
 
-[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.7...HEAD
-[0.2.7]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.6...v0.2.7
-[0.2.6]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.5...v0.2.6
-[0.2.5]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.4...v0.2.5
-[0.2.4]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.3...v0.2.4
-[0.2.3]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.2...v0.2.3
-[0.2.2]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/morfredus/HomeServerHub_travail/releases/tag/v0.1.0
+[Non publié]: https://github.com/morfredus/morfSync_travail/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/morfredus/morfSync_travail/compare/v0.2.7...v0.2.8
+[0.2.7]: https://github.com/morfredus/morfSync_travail/compare/v0.2.6...v0.2.7
+[0.2.6]: https://github.com/morfredus/morfSync_travail/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/morfredus/morfSync_travail/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/morfredus/morfSync_travail/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/morfredus/morfSync_travail/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/morfredus/morfSync_travail/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/morfredus/morfSync_travail/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/morfredus/morfSync_travail/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/morfredus/morfSync_travail/releases/tag/v0.1.0

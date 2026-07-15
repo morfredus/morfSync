@@ -1,7 +1,7 @@
 /**
  * http_server.h — Serveur HTTP/1.1 minimal, sans dépendance externe.
  *
- * Volontairement minuscule : HomeServerHub est un hub LAN privé dont on écrit
+ * Volontairement minuscule : morfSync est un hub LAN privé dont on écrit
  * aussi les clients. On n'a besoin ni de TLS, ni de keep-alive, ni de HTTP/2.
  * Une connexion = une requête = une réponse (Connection: close). Un thread par
  * connexion. Portable Windows (winsock2) / Linux / ARM64 (sockets POSIX).

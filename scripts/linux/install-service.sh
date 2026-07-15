@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
 #
-# install-service.sh — Installe HomeServerHub en service systemd (Linux/Raspberry Pi).
+# install-service.sh — Installe morfSync en service systemd (Linux/Raspberry Pi).
 #
 # Usage :
-#   sudo ./scripts/linux/install-service.sh [chemin/vers/HomeServerHub]
+#   sudo ./scripts/linux/install-service.sh [chemin/vers/morfSync]
 #   sudo ./scripts/linux/install-service.sh --uninstall
 #
 # Sans argument, le script cherche le binaire dans build/ puis build-arm64/.
 # Il installe le binaire dans /usr/local/bin, la configuration dans
-# /etc/homeserverhub/, le service dans systemd, puis démarre tout.
+# /etc/morfsync/, le service dans systemd, puis démarre tout.
 
 set -euo pipefail
 
-SERVICE_NAME="homeserverhub"
-BIN_DEST="/usr/local/bin/HomeServerHub"
-CONF_DIR="/etc/homeserverhub"
+SERVICE_NAME="morfsync"
+BIN_DEST="/usr/local/bin/morfSync"
+CONF_DIR="/etc/morfsync"
 CONF_DEST="$CONF_DIR/config.json"
+OLD_CONF_DIR="/etc/homeserverhub"   # ancien emplacement (migration)
 UNIT_DEST="/etc/systemd/system/$SERVICE_NAME.service"
 
 # Racine du dépôt = deux niveaux au-dessus de ce script.
@@ -23,7 +24,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Utilisateur sous lequel tourne le service : celui qui a lancé sudo (pas root),
-# pour que les données aillent dans SON ~/.local/share/morfredus/HomeServerHub.
+# pour que les données aillent dans SON ~/.local/share/morfredus/morfSync.
 RUN_USER="${SUDO_USER:-$(logname 2>/dev/null || echo root)}"
 RUN_HOME="$(getent passwd "$RUN_USER" | cut -d: -f6)"
 
@@ -47,14 +48,14 @@ fi
 # --- Localiser le binaire -------------------------------------------------
 BIN_SRC="${1:-}"
 if [[ -z "$BIN_SRC" ]]; then
-    for candidate in "$REPO_ROOT/build/HomeServerHub" "$REPO_ROOT/build-arm64/HomeServerHub"; do
+    for candidate in "$REPO_ROOT/build/morfSync" "$REPO_ROOT/build-arm64/morfSync"; do
         if [[ -x "$candidate" ]]; then BIN_SRC="$candidate"; break; fi
     done
 fi
 if [[ -z "$BIN_SRC" || ! -f "$BIN_SRC" ]]; then
     echo "Binaire introuvable. Compile d'abord :" >&2
     echo "    cmake --preset linux && cmake --build --preset linux" >&2
-    echo "…ou passe le chemin en argument :  sudo $0 /chemin/vers/HomeServerHub" >&2
+    echo "…ou passe le chemin en argument :  sudo $0 /chemin/vers/morfSync" >&2
     exit 1
 fi
 echo "Binaire      : $BIN_SRC"
@@ -64,6 +65,11 @@ install -m 0755 "$BIN_SRC" "$BIN_DEST"
 echo "Installé     : $BIN_DEST"
 
 mkdir -p "$CONF_DIR"
+# Migration depuis l'ancien /etc/homeserverhub : on récupère la config existante.
+if [[ ! -f "$CONF_DEST" && -f "$OLD_CONF_DIR/config.json" ]]; then
+    install -m 0644 "$OLD_CONF_DIR/config.json" "$CONF_DEST"
+    echo "Config       : migrée depuis $OLD_CONF_DIR -> $CONF_DIR"
+fi
 if [[ ! -f "$CONF_DEST" ]]; then
     if [[ -f "$REPO_ROOT/config.example.json" ]]; then
         install -m 0644 "$REPO_ROOT/config.example.json" "$CONF_DEST"
@@ -77,7 +83,7 @@ if [[ ! -f "$CONF_DEST" ]]; then
 JSON
     fi
     # dataDir volontairement absent : résolu par défaut vers le home de
-    # l'utilisateur (~/.local/share/morfredus/HomeServerHub, cf. paths.cpp).
+    # l'utilisateur (~/.local/share/morfredus/morfSync, cf. paths.cpp).
     echo "Config créée : $CONF_DEST  (édite-la pour changer le port ou ajouter un token)"
 else
     # Migration d'une config héritée : un dataDir pointant vers /var/lib n'est
@@ -93,7 +99,7 @@ fi
 
 # --- Pré-création du dossier de données de l'utilisateur ------------------
 # Le service tourne en tant que $RUN_USER ; ses données vont dans son home.
-DATA_DIR="$RUN_HOME/.local/share/morfredus/HomeServerHub"
+DATA_DIR="$RUN_HOME/.local/share/morfredus/morfSync"
 install -d -o "$RUN_USER" -g "$RUN_USER" "$DATA_DIR"
 echo "Utilisateur  : $RUN_USER"
 echo "Données      : $DATA_DIR"
@@ -103,7 +109,7 @@ echo "Données      : $DATA_DIR"
 # dans l'unité : sans HOME explicite, un service SYSTEM avec User= peut ne pas
 # résoudre le dossier de données et planter.
 sed -e "s/__RUN_USER__/$RUN_USER/g" -e "s#__RUN_HOME__#$RUN_HOME#g" \
-    "$SCRIPT_DIR/homeserverhub.service" > "$UNIT_DEST"
+    "$SCRIPT_DIR/morfsync.service" > "$UNIT_DEST"
 chmod 0644 "$UNIT_DEST"
 systemctl daemon-reload
 systemctl enable --now "$SERVICE_NAME"

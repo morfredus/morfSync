@@ -1,7 +1,7 @@
-# Contribuer à HomeServerHub
+# Contribuer à morfSync
 
 ## Principe directeur
-HomeServerHub reste **léger et agnostique au métier**. Il transporte des
+morfSync reste **léger et agnostique au métier**. Il transporte des
 enveloppes de synchronisation ; il n'interprète jamais leur contenu. Toute
 évolution doit respecter [docs/sync-contract.md](docs/sync-contract.md) — le
 contrat est la source de vérité partagée par tous les clients de l'écosystème.
@@ -15,7 +15,7 @@ contrat est la source de vérité partagée par tous les clients de l'écosystè
 
 ## Build & tests
 ```bash
-cmake --preset linux -DHSH_BUILD_SMOKE=ON
+cmake --preset linux -DMS_BUILD_SMOKE=ON
 cmake --build --preset linux
 ctest --preset linux
 ```

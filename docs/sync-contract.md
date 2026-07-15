@@ -1,4 +1,4 @@
-# HomeServerHub — Contrat de synchronisation (v1)
+# morfSync — Contrat de synchronisation (v1)
 
 > Document de référence de l'écosystème. Tous les projets clients (ComponentHub,
 > MeteoHub, RaspberryDashboard, SiteWatch, morfBeacon, morfUpdate…) suivent ce
@@ -115,7 +115,7 @@ conservation des deux versions, merge champ par champ. L'enveloppe (`rev` +
 
 ## 4. API REST
 
-Base : `http://homeserverhub.local:8080` (IP manuelle en secours).
+Base : `http://morfsync.local:8080` (IP manuelle en secours).
 Auth : en-tête `Authorization: Bearer <token>` (voir §7).
 Tous les corps sont en JSON UTF-8.
 
@@ -178,7 +178,7 @@ synchro (jamais synchronisé, propre à la machine) :
 // sync_state.json  (local, non synchronisé)
 {
   "deviceId": "windows-fred",   // UUID ou slug stable, généré au 1er lancement
-  "serverUrl": "http://homeserverhub.local:8080",
+  "serverUrl": "http://morfsync.local:8080",
   "token": "…",
   "cursors": { "componenthub": 1043, "meteohub": 88 } // lastSeq par domaine
 }
@@ -262,7 +262,7 @@ function sync(domain):
 Réseau local privé → pas de sur-ingénierie.
 - Un **token partagé statique** (`Bearer`) configuré côté serveur et dans chaque client suffit pour v1.
 - Pas de comptes, pas d'OAuth, pas de sessions tant que le besoin n'existe pas.
-- `HomeServerHub` pourra fournir plus tard une vraie authentification comme *service commun* — sans changer ce contrat de synchro.
+- `morfSync` pourra fournir plus tard une vraie authentification comme *service commun* — sans changer ce contrat de synchro.
 
 ---
 

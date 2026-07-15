@@ -4,21 +4,21 @@
   "configurePresets": [
     {
       "name": "linux",
-      "displayName": "HomeServerHub (Linux x86_64 natif)",
+      "displayName": "morfSync (Linux x86_64 natif)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
       "name": "linux-arm64",
-      "displayName": "HomeServerHub (Linux ARM64 natif, ex. Raspberry Pi)",
+      "displayName": "morfSync (Linux ARM64 natif, ex. Raspberry Pi)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-arm64",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
       "name": "linux-arm64-cross",
-      "displayName": "HomeServerHub (Linux ARM64 croisé, depuis x86_64)",
+      "displayName": "morfSync (Linux ARM64 croisé, depuis x86_64)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-arm64-cross",
       "toolchainFile": "${sourceDir}/cmake/toolchains/linux-aarch64.cmake",
@@ -26,7 +26,7 @@
     },
     {
       "name": "mingw",
-      "displayName": "HomeServerHub (Windows, MSYS2/MinGW)",
+      "displayName": "morfSync (Windows, MSYS2/MinGW)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-mingw",
       "environment": {

@@ -1,4 +1,4 @@
-# Feuille de route — HomeServerHub
+# Feuille de route — morfSync
 
 > Le hub grandit par petits paliers. On ne complexifie pas tant que le socle ne
 > fait pas mal.
@@ -17,7 +17,7 @@
 - [ ] Journalisation des conflits côté client (visibilité, sans blocage).
 
 ## v0.3 — Confort réseau
-- [ ] Découverte mDNS (`homeserverhub.local`) avec repli IP manuelle.
+- [ ] Découverte mDNS (`morfsync.local`) avec repli IP manuelle.
 - [ ] Page d'état minimale (`GET /` : domaines, dernier seq, nb d'entités).
 - [ ] Profil client léger **ESP32** (MeteoHub / morfBeacon) : PUSH mesures, PULL config.
 
