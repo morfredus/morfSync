@@ -7,11 +7,13 @@
 # install-service.sh (à utiliser pour la première installation).
 #
 # Usage :
-#   sudo ./scripts/linux/update-service.sh              # utilise build/ (ou build-arm64/)
-#   sudo ./scripts/linux/update-service.sh --build      # recompile d'abord (en tant que l'utilisateur)
+#   sudo ./scripts/linux/update-service.sh                    # utilise build/ (ou build-arm64/)
+#   sudo ./scripts/linux/update-service.sh --build            # git pull + build neuf (preset auto)
+#   sudo ./scripts/linux/update-service.sh --build linux-arm64 # forcer un preset
 #   sudo ./scripts/linux/update-service.sh /chemin/vers/HomeServerHub
 #
-# Flux typique :  git pull && sudo ./scripts/linux/update-service.sh --build
+# --build auto-détecte le preset : linux-arm64 sur un Pi 64 bits, linux sinon.
+# Flux typique sur le Pi :  sudo ./scripts/linux/update-service.sh --build
 
 set -euo pipefail
 
@@ -38,14 +40,29 @@ if [[ ! -f "$UNIT_DEST" ]]; then
 fi
 
 # --- Recompilation optionnelle (en tant que l'utilisateur, pas root) ------
-# --build : récupère le code (git pull) PUIS reconstruit à neuf (rm -rf build).
+# --build [preset] : récupère le code (git pull) PUIS reconstruit à neuf.
 # Le build neuf est indispensable : après un simple git pull, CMake ne rebâtit
 # pas toujours (le numéro de version resterait périmé dans le binaire).
+# Le preset est auto-détecté selon l'architecture (linux-arm64 sur un Pi 64 bits,
+# linux sinon), ou forcé en 2e argument : --build linux-arm64-cross
 BIN_SRC=""
 if [[ "${1:-}" == "--build" ]]; then
-    echo "Mise à jour du code + recompilation propre (utilisateur $RUN_USER)…"
-    sudo -u "$RUN_USER" bash -c "cd '$REPO_ROOT' && git pull --ff-only && rm -rf build && cmake --preset linux && cmake --build --preset linux"
-    BIN_SRC="$REPO_ROOT/build/HomeServerHub"
+    PRESET="${2:-}"
+    if [[ -z "$PRESET" ]]; then
+        case "$(uname -m)" in
+            aarch64|arm64) PRESET="linux-arm64" ;;   # Raspberry Pi 64 bits
+            *)             PRESET="linux" ;;
+        esac
+    fi
+    case "$PRESET" in
+        linux)             BUILD_DIR="build" ;;
+        linux-arm64)       BUILD_DIR="build-arm64" ;;
+        linux-arm64-cross) BUILD_DIR="build-arm64-cross" ;;
+        *) echo "Preset inconnu : $PRESET (attendu : linux, linux-arm64, linux-arm64-cross)" >&2; exit 1 ;;
+    esac
+    echo "Mise à jour du code + recompilation propre (preset $PRESET, utilisateur $RUN_USER)…"
+    sudo -u "$RUN_USER" bash -c "cd '$REPO_ROOT' && git pull --ff-only && rm -rf '$BUILD_DIR' && cmake --preset '$PRESET' && cmake --build --preset '$PRESET'"
+    BIN_SRC="$REPO_ROOT/$BUILD_DIR/HomeServerHub"
 elif [[ -n "${1:-}" ]]; then
     BIN_SRC="$1"
 fi

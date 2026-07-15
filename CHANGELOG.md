@@ -6,6 +6,14 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.2.7] — 2026-07-15
+### Corrigé
+- `update-service.sh --build` **choisit le bon preset selon l'architecture** :
+  `linux-arm64` (dossier `build-arm64`) sur un Raspberry Pi 64 bits, `linux`
+  sinon. Auparavant le preset `linux` était codé en dur. Le preset peut aussi
+  être forcé en argument (`--build linux-arm64-cross`). Documentation de mise à
+  jour ajustée en conséquence.
+
 ## [0.2.6] — 2026-07-15
 ### Ajouté
 - Option **`--version` / `-v`** : affiche la version sans démarrer le serveur
@@ -115,7 +123,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 - Contrat de synchronisation versionné dans `docs/sync-contract.md`.
 - Service systemd et README bilingue (EN/FR).
 
-[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.6...HEAD
+[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.3...v0.2.4

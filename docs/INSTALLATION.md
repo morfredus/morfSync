@@ -141,33 +141,45 @@ données conservées).
 sudo ./scripts/linux/update-service.sh --build
 ```
 
-`--build` fait tout : `git pull`, **reconstruction propre** (`rm -rf build`
-puis compilation, en tant que l'utilisateur), puis arrêt du service,
+`--build` fait tout : `git pull`, **reconstruction propre** (`rm -rf` du dossier
+de build puis compilation, en tant que l'utilisateur), puis arrêt du service,
 remplacement de `/usr/local/bin/HomeServerHub` et redémarrage. Le script affiche
 la version du nouveau binaire et la transition (ex. `0.2.5 -> 0.2.6`).
+
+Le **preset est auto-détecté** selon l'architecture : `linux-arm64` sur un
+Raspberry Pi 64 bits, `linux` sinon. Le forcer au besoin :
+
+```bash
+sudo ./scripts/linux/update-service.sh --build linux-arm64
+```
 
 #### Méthode manuelle (ordre exact, en cas de doute)
 
 À suivre pas à pas si la mise à jour semble ne rien changer :
 
+Sur **Raspberry Pi 64 bits**, utiliser le preset `linux-arm64` (dossier
+`build-arm64`) ; sur un PC x86_64, `linux` (dossier `build`). Exemple pour le Pi :
+
 ```bash
-cd ~/Codage/Apps/HomeServerHub        # adapter au chemin du dépôt
+cd ~/Codage/Apps/HomeServerHub               # adapter au chemin du dépôt
 
-git pull                              # 1. récupérer le code
-cat VERSION                           # 2. confirmer la nouvelle version
+git pull                                     # 1. récupérer le code
+cat VERSION                                  # 2. confirmer la nouvelle version
 
-rm -rf build                          # 3. build NEUF (étape indispensable)
-cmake --preset linux
-cmake --build --preset linux
+rm -rf build-arm64                           # 3. build NEUF (étape indispensable)
+cmake --preset linux-arm64
+cmake --build --preset linux-arm64
 
-./build/HomeServerHub --version       # 4. vérifier la version compilée
+./build-arm64/HomeServerHub --version        # 4. vérifier la version compilée
 
-sudo systemctl stop homeserverhub     # 5. remplacer le binaire du service
-sudo install -m 0755 build/HomeServerHub /usr/local/bin/HomeServerHub
+sudo systemctl stop homeserverhub            # 5. remplacer le binaire du service
+sudo install -m 0755 build-arm64/HomeServerHub /usr/local/bin/HomeServerHub
 sudo systemctl restart homeserverhub
 
-curl http://localhost:8080/api/health # 6. vérifier la version en service
+curl http://localhost:8080/api/health        # 6. vérifier la version en service
 ```
+
+(Sur PC x86_64 : remplacer `linux-arm64` par `linux` et `build-arm64` par `build`.)
 
 > **`rm -rf build` (étape 3) est indispensable.** Après un simple `git pull`,
 > CMake ne recompile pas toujours : l'ancien binaire resterait dans `build/` et
