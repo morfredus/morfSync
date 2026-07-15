@@ -3,12 +3,32 @@
 #include <algorithm>
 #include <fstream>
 #include <filesystem>
+#include <random>
+#include <cstdio>
+#include <cstdint>
 
 namespace hsh {
+
+namespace {
+// Identité d'un journal (« époque ») : générée une fois à la création d'un
+// journal, persistée. Si le fichier disparaît (dossier déplacé/effacé), un
+// nouveau journalId est émis -> les clients détectent le changement et
+// réinitialisent leur curseur au lieu de rater silencieusement les changements.
+std::string generateJournalId() {
+    static thread_local std::mt19937_64 rng{std::random_device{}()};
+    std::uniform_int_distribution<std::uint64_t> dist;
+    char buf[33];
+    std::snprintf(buf, sizeof(buf), "%016llx%016llx",
+                  static_cast<unsigned long long>(dist(rng)),
+                  static_cast<unsigned long long>(dist(rng)));
+    return buf;
+}
+} // namespace
 
 ChangeStore::ChangeStore(std::string domain, std::string filePath)
     : domain_(std::move(domain)), filePath_(std::move(filePath)) {
     load();
+    if (journalId_.empty()) journalId_ = generateJournalId();
 }
 
 void ChangeStore::load() {
@@ -23,6 +43,7 @@ void ChangeStore::load() {
     }
 
     nextSeq_ = j.value("nextSeq", static_cast<std::int64_t>(0));
+    journalId_ = j.value("journalId", std::string());
     if (j.contains("changes") && j["changes"].is_array()) {
         for (const auto& item : j["changes"]) {
             Change c = Change::fromJson(item);
@@ -35,7 +56,8 @@ void ChangeStore::save() const {
     nlohmann::json changes = nlohmann::json::array();
     for (const auto& [id, c] : byId_) changes.push_back(c.toJson());
 
-    nlohmann::json j{{"domain", domain_}, {"nextSeq", nextSeq_}, {"changes", changes}};
+    nlohmann::json j{{"domain", domain_}, {"journalId", journalId_},
+                     {"nextSeq", nextSeq_}, {"changes", changes}};
 
     // Écriture atomique : fichier temporaire puis renommage, pour ne jamais
     // laisser un journal tronqué si le process meurt en cours d'écriture.

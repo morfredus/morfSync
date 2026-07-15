@@ -31,7 +31,7 @@ full specification lives in [docs/sync-contract.md](docs/sync-contract.md).
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | `GET`  | `/api/health` | Server status (open, no auth) |
-| `GET`  | `/api/status` | Known domains: entity count and `lastSeq` cursor |
+| `GET`  | `/api/status` | Known domains: entities, `lastSeq` cursor and `journalId` (epoch) |
 | `GET`  | `/api/{domain}/changes?since=N&limit=M` | PULL changes since cursor |
 | `POST` | `/api/{domain}/changes` | PUSH local changes, get assigned `seq` |
 

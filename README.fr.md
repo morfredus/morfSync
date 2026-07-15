@@ -32,7 +32,7 @@ RTC). La spécification complète est dans [docs/sync-contract.md](docs/sync-con
 | Méthode | Endpoint | Rôle |
 |---------|----------|------|
 | `GET`  | `/api/health` | État du serveur (ouvert, sans auth) |
-| `GET`  | `/api/status` | Domaines connus : nombre d'entités et curseur `lastSeq` |
+| `GET`  | `/api/status` | Domaines connus : entités, curseur `lastSeq` et `journalId` (époque) |
 | `GET`  | `/api/{domaine}/changes?since=N&limit=M` | PULL des changements depuis le curseur |
 | `POST` | `/api/{domaine}/changes` | PUSH des changements locaux, récupère le `seq` attribué |
 

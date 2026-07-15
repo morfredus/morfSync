@@ -93,7 +93,8 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         nlohmann::json arr = nlohmann::json::array();
         for (auto& [name, s] : stores_)
-            arr.push_back({{"domain", name}, {"count", s->count()}, {"lastSeq", s->lastSeq()}});
+            arr.push_back({{"domain", name}, {"count", s->count()},
+                           {"lastSeq", s->lastSeq()}, {"journalId", s->journalId()}});
         return arr;
     }
 
@@ -180,10 +181,12 @@ int main(int argc, char** argv) {
         std::size_t  limit = static_cast<std::size_t>(
                                  std::strtoul(req.queryParam("limit", "0").c_str(), nullptr, 10));
 
-        hsh::PullResult pull = registry.store(domain).changesSince(since, limit);
+        hsh::ChangeStore& store = registry.store(domain);
+        hsh::PullResult pull = store.changesSince(since, limit);
         json changes = json::array();
         for (const auto& c : pull.changes) changes.push_back(c.toJson());
-        json body{{"changes", changes}, {"lastSeq", pull.lastSeq}, {"hasMore", pull.hasMore}};
+        json body{{"changes", changes}, {"lastSeq", pull.lastSeq}, {"hasMore", pull.hasMore},
+                  {"journalId", store.journalId()}};  // « époque » : reset côté client si elle change
         return hsh::HttpResponse::json(200, body.dump());
     });
 

@@ -47,6 +47,7 @@ public:
     ChangeStore(std::string domain, std::string filePath);
 
     const std::string& domain() const { return domain_; }
+    const std::string& journalId() const { return journalId_; }  // « époque » du journal
     std::int64_t lastSeq() const;
     std::size_t count() const;   // nombre d'entités connues (tombstones inclus)
 
@@ -63,6 +64,7 @@ private:
     void save() const;   // appelé sous verrou
 
     std::string domain_;
+    std::string journalId_;   // identité stable du journal (« époque »)
     std::string filePath_;
     mutable std::mutex mutex_;
     std::int64_t nextSeq_ = 0;

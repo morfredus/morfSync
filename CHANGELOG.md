@@ -6,6 +6,16 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.2.5] — 2026-07-15
+### Ajouté
+- **Identité de journal (« époque ») par domaine** : un `journalId` stable est
+  généré à la création d'un journal et exposé dans la réponse de `GET
+  /{domaine}/changes` et dans `GET /api/status`. S'il change (dossier de données
+  déplacé/effacé → journal repartant de zéro), les clients le détectent et
+  **réinitialisent leur curseur** au lieu de rater silencieusement les
+  changements. Corrige le cas « une suppression n'est pas propagée aux autres
+  postes après un déménagement des données du hub ».
+
 ## [0.2.4] — 2026-07-15
 ### Corrigé
 - Le service systemd impose désormais `HOME` et `WorkingDirectory` (via
@@ -91,7 +101,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 - Contrat de synchronisation versionné dans `docs/sync-contract.md`.
 - Service systemd et README bilingue (EN/FR).
 
-[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.4...HEAD
+[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.1...v0.2.2
