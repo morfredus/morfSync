@@ -1,0 +1,32 @@
+# Service systemd pour HomeServerHub.
+#
+# Installation :
+#   sudo cp HomeServerHub /usr/local/bin/
+#   sudo mkdir -p /etc/homeserverhub /var/lib/homeserverhub
+#   sudo cp config.example.json /etc/homeserverhub/config.json   # puis l'éditer
+#   sudo cp scripts/linux/homeserverhub.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now homeserverhub
+#
+# Dans /etc/homeserverhub/config.json, régler "dataDir": "/var/lib/homeserverhub".
+
+[Unit]
+Description=HomeServerHub — socle de synchronisation offline-first
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/HomeServerHub /etc/homeserverhub/config.json
+WorkingDirectory=/var/lib/homeserverhub
+Restart=on-failure
+RestartSec=3
+
+# Durcissement minimal.
+DynamicUser=yes
+StateDirectory=homeserverhub
+ProtectSystem=strict
+ProtectHome=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
