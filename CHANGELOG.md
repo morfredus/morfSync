@@ -6,6 +6,14 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.2.4] — 2026-07-15
+### Corrigé
+- Le service systemd impose désormais `HOME` et `WorkingDirectory` (via
+  `__RUN_HOME__`, injecté par `install-service.sh`) : un service SYSTEM avec
+  `User=` ne reçoit pas toujours `$HOME`, ce qui empêchait le hub de résoudre son
+  dossier de données (`%h` vaudrait `/root`). Défense en profondeur, en plus du
+  garde-fou d'écriture et de la migration de config de la 0.2.3.
+
 ## [0.2.3] — 2026-07-15
 ### Corrigé
 - **Plus de boucle de redémarrage** quand le dossier de données est
@@ -83,7 +91,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 - Contrat de synchronisation versionné dans `docs/sync-contract.md`.
 - Service systemd et README bilingue (EN/FR).
 
-[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.3...HEAD
+[Non publié]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/morfredus/HomeServerHub_travail/compare/v0.2.0...v0.2.1

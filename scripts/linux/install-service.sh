@@ -99,8 +99,11 @@ echo "Utilisateur  : $RUN_USER"
 echo "Données      : $DATA_DIR"
 
 # --- Installer et démarrer le service -------------------------------------
-# On injecte l'utilisateur dans l'unité (User=/Group=).
-sed "s/__RUN_USER__/$RUN_USER/g" "$SCRIPT_DIR/homeserverhub.service" > "$UNIT_DEST"
+# On injecte l'utilisateur (User=/Group=) et son home (HOME=/WorkingDirectory=)
+# dans l'unité : sans HOME explicite, un service SYSTEM avec User= peut ne pas
+# résoudre le dossier de données et planter.
+sed -e "s/__RUN_USER__/$RUN_USER/g" -e "s#__RUN_HOME__#$RUN_HOME#g" \
+    "$SCRIPT_DIR/homeserverhub.service" > "$UNIT_DEST"
 chmod 0644 "$UNIT_DEST"
 systemctl daemon-reload
 systemctl enable --now "$SERVICE_NAME"

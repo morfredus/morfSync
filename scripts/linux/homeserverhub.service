@@ -3,13 +3,14 @@
 # Le service tourne EN TANT QUE L'UTILISATEUR (User=/Group=), pour que ses
 # données restent accessibles dans ~/.local/share/morfredus/HomeServerHub
 # (et non dans /var/lib, réservé au root). Le script install-service.sh
-# remplace __RUN_USER__ par l'utilisateur courant ; en installation manuelle,
-# remplacez-le vous-même (ou ajoutez un drop-in User=/Group=).
+# remplace __RUN_USER__ et __RUN_HOME__ ; en installation manuelle, remplacez-les
+# vous-même (utilisateur + son répertoire home).
 #
 # Installation manuelle :
 #   sudo cp HomeServerHub /usr/local/bin/
 #   sudo mkdir -p /etc/homeserverhub && sudo cp config.example.json /etc/homeserverhub/config.json
-#   sed 's/__RUN_USER__/votreuser/g' scripts/linux/homeserverhub.service | sudo tee /etc/systemd/system/homeserverhub.service
+#   sed -e 's/__RUN_USER__/votreuser/g' -e 's#__RUN_HOME__#/home/votreuser#g' \
+#       scripts/linux/homeserverhub.service | sudo tee /etc/systemd/system/homeserverhub.service
 #   sudo systemctl daemon-reload && sudo systemctl enable --now homeserverhub
 
 [Unit]
@@ -21,6 +22,11 @@ Wants=network-online.target
 Type=simple
 User=__RUN_USER__
 Group=__RUN_USER__
+# $HOME et le dossier de travail sont imposés explicitement : pour un service
+# SYSTEM avec User=, systemd ne fournit pas toujours $HOME, et %h vaudrait /root.
+# Sans ça, le hub ne résout pas son dossier de données et plante (SIGABRT).
+Environment=HOME=__RUN_HOME__
+WorkingDirectory=__RUN_HOME__
 ExecStart=/usr/local/bin/HomeServerHub /etc/homeserverhub/config.json
 Restart=on-failure
 RestartSec=3
