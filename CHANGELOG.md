@@ -6,6 +6,33 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.2.9] – 2026-07-19
+
+### Corrigé
+
+- **La mise à jour ne livrait jamais les nouveaux paramètres de configuration.**
+  `update-service.sh` ne recopiait que le binaire et laissait `/etc/morfsync/config.json`
+  intact, par souci de préserver les réglages locaux. Conséquence : un paramètre
+  introduit après l'installation restait absent indéfiniment, et la fonction
+  correspondante ne s'activait jamais **sans que rien ne le signale**. La mise à
+  jour **complète** désormais la configuration (`scripts/linux/merge-config.py`) :
+  les valeurs déjà en place ne sont jamais modifiées, les clés manquantes sont
+  ajoutées puis listées, et une sauvegarde précède toute écriture. Option
+  `--no-config` pour laisser la configuration strictement intacte.
+- **La configuration absente n'était pas recréée.** Après une installation
+  partielle ou une suppression du dossier, la mise à jour laissait le service
+  démarrer sans configuration. Elle est désormais recopiée depuis l'exemple.
+- **L'unité systemd n'était pas rafraîchie.** Une modification du fichier
+  `.service` dans le dépôt ne parvenait jamais à `/etc/systemd/system` : le
+  service continuait de tourner avec l'ancienne définition.
+- **L'analyse des options ne dépend plus de leur position.** Le script lisait
+  `--build` en 1re position et son preset en 2e ; ajouter une option devant
+  aurait cassé cette lecture.
+
+> morfSync n'embarque aucune dépendance vendorée (`third_party/`) : contrairement
+> aux autres services de l'écosystème, il n'y a rien à resynchroniser ici. Le
+> sujet du commit précédent mentionne à tort une resynchronisation de morfBeacon.
+
 ## [0.2.8] — 2026-07-15
 ### Modifié — renommage HomeServerHub → morfSync
 

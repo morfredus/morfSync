@@ -146,6 +146,17 @@ de build puis compilation, en tant que l'utilisateur), puis arrêt du service,
 remplacement de `/usr/local/bin/morfSync` et redémarrage. Le script affiche
 la version du nouveau binaire et la transition (ex. `0.2.5 -> 0.2.6`).
 
+La mise à jour **complète aussi la configuration** : les valeurs déjà présentes
+dans `/etc/morfsync/config.json` ne sont jamais modifiées, mais les paramètres
+apparus depuis l'installation y sont ajoutés puis listés à l'écran. Sans cela,
+un réglage introduit par une nouvelle version resterait absent indéfiniment et
+la fonction correspondante ne s'activerait jamais, en silence. Une sauvegarde
+est prise avant toute écriture ; `--no-config` laisse la configuration
+strictement intacte. Si le fichier est absent, il est recopié depuis l'exemple.
+
+L'**unité systemd** est également rafraîchie si le fichier `.service` du dépôt a
+changé.
+
 Le **preset est auto-détecté** selon l'architecture : `linux-arm64` sur un
 Raspberry Pi 64 bits, `linux` sinon. Le forcer au besoin :
 

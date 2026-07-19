@@ -17,6 +17,22 @@
 
 set -euo pipefail
 
+# Analyse des options, INDEPENDANTE de leur ordre. Le script lisait --build en
+# 1re position et son preset en 2e ; ajouter une option devant aurait casse cette
+# lecture. Les drapeaux sont donc extraits ici, et le preset est le premier
+# argument qui n'est pas un drapeau.
+NO_CONFIG=0
+DO_BUILD=0
+PRESET_ARG=""
+for arg in "$@"; do
+    case "$arg" in
+        --no-config) NO_CONFIG=1 ;;
+        --build)     DO_BUILD=1 ;;
+        --*)         echo "Option inconnue : $arg" >&2; exit 1 ;;
+        *)           [[ -z "$PRESET_ARG" ]] && PRESET_ARG="$arg" ;;
+    esac
+done
+
 SERVICE_NAME="morfsync"
 BIN_DEST="/usr/local/bin/morfSync"
 CONF_DEST="/etc/morfsync/config.json"
@@ -46,8 +62,8 @@ fi
 # Le preset est auto-détecté selon l'architecture (linux-arm64 sur un Pi 64 bits,
 # linux sinon), ou forcé en 2e argument : --build linux-arm64-cross
 BIN_SRC=""
-if [[ "${1:-}" == "--build" ]]; then
-    PRESET="${2:-}"
+if [[ $DO_BUILD -eq 1 ]]; then
+    PRESET="$PRESET_ARG"
     if [[ -z "$PRESET" ]]; then
         case "$(uname -m)" in
             aarch64|arm64) PRESET="linux-arm64" ;;   # Raspberry Pi 64 bits
@@ -63,8 +79,9 @@ if [[ "${1:-}" == "--build" ]]; then
     echo "Mise à jour du code + recompilation propre (preset $PRESET, utilisateur $RUN_USER)…"
     sudo -u "$RUN_USER" bash -c "cd '$REPO_ROOT' && git pull --ff-only && rm -rf '$BUILD_DIR' && cmake --preset '$PRESET' && cmake --build --preset '$PRESET'"
     BIN_SRC="$REPO_ROOT/$BUILD_DIR/morfSync"
-elif [[ -n "${1:-}" ]]; then
-    BIN_SRC="$1"
+elif [[ -n "$PRESET_ARG" ]]; then
+    # Sans --build, le premier argument non-drapeau est un chemin de binaire.
+    BIN_SRC="$PRESET_ARG"
 fi
 
 # --- Localiser le binaire si non fourni ----------------------------------
@@ -91,6 +108,51 @@ systemctl stop "$SERVICE_NAME"
 install -m 0755 "$BIN_SRC" "$BIN_DEST"
 echo "Binaire remplacé : $BIN_DEST"
 echo "Redémarrage…"
+# --- Rafraîchir l'unité systemd ------------------------------------------
+# Une modification du fichier .service dans le dépôt ne parvenait jamais à
+# /etc/systemd/system : le service continuait de tourner avec l'ancienne
+# définition, sans que rien ne le signale.
+if [[ -f "$SCRIPT_DIR/morfsync.service" ]]; then
+    NEW_UNIT="$(mktemp)"
+    sed -e "s/__RUN_USER__/$RUN_USER/g" "$SCRIPT_DIR/morfsync.service" > "$NEW_UNIT"
+    if ! cmp -s "$NEW_UNIT" "$UNIT_DEST"; then
+        echo "Unité systemd modifiée : mise à jour."
+        install -m 0644 "$NEW_UNIT" "$UNIT_DEST"
+        systemctl daemon-reload
+    fi
+    rm -f "$NEW_UNIT"
+fi
+
+# --- Compléter la configuration ------------------------------------------
+# Les valeurs déjà en place ne sont JAMAIS modifiées, mais les paramètres
+# APPARUS depuis l'installation sont ajoutés. Sans cela, une version
+# introduisant un paramètre le laissait absent indéfiniment et la fonction
+# correspondante ne s'activait jamais, en silence.
+EXAMPLE_FILE="$REPO_ROOT/config.example.json"
+if [[ $NO_CONFIG -eq 0 && -f "$EXAMPLE_FILE" ]]; then
+    if [[ ! -f "$CONF_DEST" ]]; then
+        mkdir -p "$(dirname "$CONF_DEST")"
+        install -m 0644 "$EXAMPLE_FILE" "$CONF_DEST"
+        echo "Config absente : copiée depuis l'exemple -> $CONF_DEST (à adapter)."
+    elif command -v python3 >/dev/null 2>&1; then
+        BACKUP="$CONF_DEST.bak-$(date +%Y%m%d-%H%M%S)"
+        cp "$CONF_DEST" "$BACKUP"
+        ADDED="$(python3 "$SCRIPT_DIR/merge-config.py" "$EXAMPLE_FILE" "$CONF_DEST" || true)"
+        if [[ -n "$ADDED" ]]; then
+            echo
+            echo "Nouveaux paramètres ajoutés à $CONF_DEST :"
+            echo "$ADDED" | sed 's/^/    /'
+            echo "  (valeurs existantes inchangées ; sauvegarde : $BACKUP)"
+            echo "  À RENSEIGNER si besoin avant que la fonction correspondante s'active."
+            echo
+        else
+            rm -f "$BACKUP"
+        fi
+    else
+        echo "python3 absent : configuration non complétée (voir $EXAMPLE_FILE)." >&2
+    fi
+fi
+
 systemctl start "$SERVICE_NAME"
 
 # --- Vérification ---------------------------------------------------------
