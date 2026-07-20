@@ -6,6 +6,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+- Documentation de version alignée sur les liens de dépôt de production.
+
 ## [0.2.9] – 2026-07-19
 
 ### Corrigé
