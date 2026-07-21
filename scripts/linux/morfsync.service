@@ -6,11 +6,12 @@
 # remplace __RUN_USER__ et __RUN_HOME__ ; en installation manuelle, remplacez-les
 # vous-même (utilisateur + son répertoire home).
 #
-# Nom d'unité : « morfsync ». Config dans /etc/morfsync.
+# Nom d'unité : « morfsync ». Binaire et config dans __APP_DIR__
+# (/opt/morfsync par défaut), comme tous les autres services du parc :
+# un dossier FIXE hors du clone git, que déplacer le dépôt ne casse pas.
 #
 # Installation manuelle :
-#   sudo cp morfSync /usr/local/bin/
-#   sudo mkdir -p /etc/morfsync && sudo cp config.example.json /etc/morfsync/config.json
+#   (préférer ./service.py install, qui fait tout et migre l'ancienne config)
 #   sed -e 's/__RUN_USER__/votreuser/g' -e 's#__RUN_HOME__#/home/votreuser#g' \
 #       scripts/linux/morfsync.service | sudo tee /etc/systemd/system/morfsync.service
 #   sudo systemctl daemon-reload && sudo systemctl enable --now morfsync
@@ -29,7 +30,7 @@ Group=__RUN_USER__
 # Sans ça, le hub ne résout pas son dossier de données et plante (SIGABRT).
 Environment=HOME=__RUN_HOME__
 WorkingDirectory=__RUN_HOME__
-ExecStart=/usr/local/bin/morfSync /etc/morfsync/config.json
+ExecStart=__APP_DIR__/morfSync __APP_DIR__/morfsync.json
 Restart=on-failure
 RestartSec=3
 NoNewPrivileges=yes

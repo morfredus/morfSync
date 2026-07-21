@@ -1,0 +1,27 @@
+{
+  "_comment": "Deployment facts for this project, read by morfdeploy. morfSync used to keep its binary in /usr/local/bin and its configuration in /etc/morfsync, alone in the parc. It now follows the same convention as every other service.",
+  "service_name": "morfsync",
+  "display_name": "morfSync",
+  "description": "Offline-first synchronisation hub",
+  "binary": "morfSync",
+  "app_dir": {
+    "linux": "/opt/morfsync",
+    "windows": "%ProgramData%/morfsync"
+  },
+  "_comment_configs": "'migrate_from' lists the earlier homes of this file. The first one found is ADOPTED, not replaced by the example: settings edited by hand outlive the directory convention they were written under. morfSync has been moved once already, from /etc/homeserverhub, and that migration was hard-coded in its install script where nothing else could learn from it.",
+  "configs": [
+    {
+      "source": "config.example.json",
+      "dest": "morfsync.json",
+      "migrate_from": [
+        "/etc/morfsync/config.json",
+        "/etc/homeserverhub/config.json"
+      ]
+    }
+  ],
+  "_comment_legacy": "Reported at install, never deleted.",
+  "legacy_binaries": [
+    "/usr/local/bin/morfSync"
+  ],
+  "status_url": "http://127.0.0.1:8080/status"
+}
