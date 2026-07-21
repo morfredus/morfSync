@@ -22,6 +22,15 @@ bool Config::loadFromFile(const std::string& path, Config& out, std::string& err
     out.port    = j.value("port", out.port);
     out.dataDir = j.value("dataDir", out.dataDir);
     out.token   = j.value("token", out.token);
+
+    // Bloc facultatif : une configuration écrite avant l'annonce de présence
+    // reste valide et garde les défauts du parc.
+    if (j.contains("beacon") && j["beacon"].is_object()) {
+        const auto& b = j["beacon"];
+        out.beaconEnabled    = b.value("enabled", out.beaconEnabled);
+        out.beaconPort       = b.value("udp_port", out.beaconPort);
+        out.beaconIntervalMs = b.value("interval_ms", out.beaconIntervalMs);
+    }
     return true;
 }
 

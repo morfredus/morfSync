@@ -23,6 +23,7 @@ find_package(Threads REQUIRED)
 # =====================================================================
 add_library(morfsync_core STATIC
     src/net/http_server.cpp
+    src/net/beacon.cpp
     src/sync/change_store.cpp
     src/app/config.cpp
     src/app/paths.cpp

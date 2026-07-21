@@ -23,5 +23,6 @@
   "legacy_binaries": [
     "/usr/local/bin/morfSync"
   ],
-  "status_url": "http://127.0.0.1:8080/status"
+  "status_url": "http://127.0.0.1:8080/status",
+  "_comment_status": "morfSync now serves /status per morfbeacon/1, alongside the /api/status its synchronisation clients already call. Both are kept: replacing one with the other would break callers to tidy a naming."
 }

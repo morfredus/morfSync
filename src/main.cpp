@@ -19,6 +19,7 @@
 #include <nlohmann/json.hpp>
 
 #include "net/http_server.h"
+#include "net/beacon.h"
 #include "sync/change_store.h"
 #include "app/config.h"
 #include "app/paths.h"
@@ -163,6 +164,33 @@ int main(int argc, char** argv) {
         const std::string h = req.header("authorization");
         return h == "Bearer " + cfg.token;
     };
+
+    // --- Annonce de présence sur le LAN ------------------------------------
+    // morfSync est le premier service du parc : il précède le protocole que les
+    // autres respectent, et restait invisible dans l'Écosystème de morfMonitor
+    // -- jamais en panne, jamais découvert.
+    hsh::Beacon beacon(
+        hsh::BeaconIdentity{"morfSync", MS_VERSION,
+                            hsh::makeInstanceId("morfSync", cfg.port), cfg.port},
+        hsh::BeaconSettings{cfg.beaconEnabled, cfg.beaconPort, cfg.beaconIntervalMs});
+    beacon.start();
+    if (cfg.beaconEnabled) {
+        std::cout << "  presence : annoncee sur le port UDP " << cfg.beaconPort
+                  << " (morfbeacon/1)" << std::endl;
+    }
+
+    // --- GET /status : contrat morfbeacon/1 ---------------------------------
+    // Distinct de /api/status, qui reste inchangé : celui-ci répond au parc,
+    // celui-là aux clients de synchronisation. Les deux vivent côte à côte
+    // plutôt que l'un remplaçant l'autre, parce que des consommateurs
+    // existants appellent déjà /api/status.
+    server.route("GET", "/status", [&beacon, &registry](const hsh::HttpRequest&) {
+        json body = json::parse(beacon.identityJson(beacon.uptimeSeconds()));
+        // Le heartbeat reste court ; le détail vit ici. « Push presence,
+        // pull detail. »
+        body["metrics"] = {{"domains", registry.statusJson().size()}};
+        return hsh::HttpResponse::json(200, body.dump());
+    });
 
     // --- GET /api/health : état du serveur (ouvert, sans auth) --------------
     server.route("GET", "/api/health", [](const hsh::HttpRequest&) {

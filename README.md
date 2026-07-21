@@ -94,8 +94,8 @@ Quick check: `curl http://localhost:8080/api/health`
 (host/port), firewall: see [docs/INSTALLATION.md](docs/INSTALLATION.md). Absolute
 beginner walkthrough: [docs/GUIDE_DEBUTANT.md](docs/GUIDE_DEBUTANT.md) (French).
 
-- Linux: `sudo ./scripts/linux/install-service.sh`
-- Windows (admin PowerShell): `.\scripts\windows\install-service.ps1`
+- Any platform: `sudo ./service.py install` (also `update`, `uninstall`, `status`)
+- The former `scripts/linux/install-service.sh` and its PowerShell twin still work
 
 ## Repository layout
 

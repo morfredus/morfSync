@@ -1,5 +1,16 @@
 {
+  "_comment": "Configuration morfSync. Deployee vers /opt/morfsync/morfsync.json par ./service.py install, qui ADOPTE une configuration existante plutot que de la remplacer. Modifier ce fichier ne change rien tant que le deploiement n'a pas ete lance.",
+
   "host": "0.0.0.0",
   "port": 8080,
-  "token": ""
+
+  "_comment_token": "Bearer partage. Vide = authentification desactivee, ce qui suppose un LAN de confiance -- le modele du parc. Voir ECOSYSTEM-PRINCIPLES.md.",
+  "token": "",
+
+  "_comment_beacon": "Annonce de presence (morfbeacon/1). Sans elle, morfSync fonctionne mais reste invisible dans l'onglet Ecosysteme de morfMonitor : jamais en panne, jamais decouvert. Le port est celui du parc, defini dans morfTools/ecosystem.json.",
+  "beacon": {
+    "enabled": true,
+    "udp_port": 45454,
+    "interval_ms": 15000
+  }
 }

@@ -96,8 +96,8 @@ configuration de l'écoute (adresse/port), pare-feu : voir
 [docs/INSTALLATION.md](docs/INSTALLATION.md). Prise en main pas à pas pour
 débuter : [docs/GUIDE_DEBUTANT.md](docs/GUIDE_DEBUTANT.md).
 
-- Linux : `sudo ./scripts/linux/install-service.sh`
-- Windows (PowerShell admin) : `.\scripts\windows\install-service.ps1`
+- Toutes plateformes : `sudo ./service.py install` (aussi `update`, `uninstall`, `status`)
+- Les anciens `scripts/linux/install-service.sh` et leur jumeau PowerShell fonctionnent toujours
 
 ## Organisation du dépôt
 
