@@ -1,16 +1,17 @@
 /**
- * paths.h — Emplacement de stockage des données selon les conventions de l'OS.
+ * paths.h — Emplacement de stockage des données du service.
  *
- * morfSync est un service : ses données (journaux de synchro par domaine)
- * vont à l'endroit attendu par le système, sous l'organisation « morfredus »,
- * et surtout ACCESSIBLE À L'UTILISATEUR (pas /var/lib réservé au root).
- *   - Linux : $XDG_DATA_HOME/morfredus/morfSync, sinon
- *     ~/.local/share/morfredus/morfSync.
- *   - Windows : %LOCALAPPDATA%\morfredus\morfSync, sinon
- *     %ProgramData%\morfredus\morfSync.
+ * morfSync est un service, pas une application utilisateur : ses données
+ * (journaux de synchro par domaine) sont sa source de vérité, et personne ne les
+ * ouvre à la main. Toutes les opérations (lecture, suppression) passent par les
+ * consommateurs via le réseau. Elles suivent donc la convention morfSystem
+ * (docs/FILESYSTEM.md), sous <app_dir>/data :
+ *   - Linux   : /opt/morfsync/data.
+ *   - Windows : %ProgramData%\morfsync\data.
  *
  * Utilisé quand la configuration ne fixe pas explicitement `dataDir`. Le service
- * systemd tourne donc en tant que l'utilisateur (User=), pas en DynamicUser.
+ * systemd doit tourner sous un compte ayant l'écriture sur ce dossier (provisionné
+ * par morfdeploy) ; main.cpp vérifie la créabilité et l'écriture au démarrage.
  */
 
 #pragma once

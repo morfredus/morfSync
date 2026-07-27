@@ -48,20 +48,23 @@ Windows** :
 
 ### Où sont stockées les données par défaut
 
-Si `dataDir` n'est pas précisé, morfSync choisit l'emplacement attendu par
-le système :
+Si `dataDir` n'est pas précisé, morfSync range ses données selon la convention
+morfSystem (voir [FILESYSTEM.md](https://github.com/morfredus/morfSystem/blob/main/docs/FILESYSTEM.md)),
+sous `<app_dir>/data` :
 
 | Système | Emplacement des données |
 |---------|-------------------------|
-| Linux | `~/.local/share/morfredus/morfSync` (ou `$XDG_DATA_HOME/morfredus/morfSync`) |
-| Windows | `%LOCALAPPDATA%\morfredus\morfSync` (ou `%ProgramData%\morfredus\morfSync`) |
+| Linux | `/opt/morfsync/data` |
+| Windows | `%ProgramData%\morfsync\data` |
 
-Ces emplacements sont **accessibles à l'utilisateur** (contrairement à
-`/var/lib`). Le service systemd tourne donc **en tant que votre utilisateur**
-(`User=`), pas en compte dynamique - `service.py install` s'en charge
-automatiquement. Le dossier retenu est affiché dans le journal au démarrage, et
-les données **survivent aux redémarrages** (le hub recharge les domaines
-existants au lancement).
+morfSync est un **service**, pas une application utilisateur : ces fichiers sont
+sa source de vérité et personne ne les ouvre à la main. Toutes les opérations
+(consultation, suppression) passent par les **consommateurs** via le réseau. Le
+compte sous lequel tourne le service doit avoir l'écriture sur ce dossier
+(provisionné par `service.py install`) ; morfSync vérifie la créabilité et
+l'écriture au démarrage, affiche le dossier retenu dans le journal, et les
+données **survivent aux redémarrages** (le hub recharge les domaines existants au
+lancement).
 
 **Pour être joignable par un autre poste du réseau, `host` doit valoir `0.0.0.0`.**
 C'est la valeur par défaut ; ne la mettez à `127.0.0.1` que pour un test purement local.
@@ -118,8 +121,8 @@ sudo systemctl enable --now morfsync                       # nom en minuscules
 > `systemctl start MorfSync` (mauvaise casse) échouera (« Unit not found »).
 
 Le service tourne **en tant que votre utilisateur** (`User=`) ; ses données vont
-dans `~/.local/share/morfredus/morfSync` (voir §1). `service.py install` injecte
-l'utilisateur et son home automatiquement.
+dans `/opt/morfsync/data` (voir §1). `service.py install` provisionne le dossier
+et les droits automatiquement.
 
 ### Piloter le service
 

@@ -13,18 +13,16 @@ std::string env(const char* name) {
 } // namespace
 
 std::string defaultDataDir() {
-    // Emplacement de données de l'application, sous l'organisation « morfredus »
-    // (cohérent avec les autres apps de l'écosystème). Choisi pour rester
-    // ACCESSIBLE À L'UTILISATEUR (pas /var/lib, réservé au root).
+    // Données MÉTIER du service (source de vérité), rangées selon la convention
+    // morfSystem : <app_dir>/data (docs/FILESYSTEM.md). morfSync est un service,
+    // pas une application utilisateur : personne n'ouvre ces fichiers à la main,
+    // toutes les opérations (lecture, suppression) passent par les consommateurs
+    // via le réseau. Les données vivent donc sous /opt, pas dans le home.
 #if defined(_WIN32)
-    if (std::string la = env("LOCALAPPDATA"); !la.empty())  return la + "\\morfredus\\morfSync";
-    if (std::string pd = env("PROGRAMDATA"); !pd.empty())   return pd + "\\morfredus\\morfSync";
+    if (std::string pd = env("PROGRAMDATA"); !pd.empty())   return pd + "\\morfsync\\data";
     return "data";
 #else
-    // Convention XDG : ~/.local/share/morfredus/morfSync.
-    if (std::string xdg = env("XDG_DATA_HOME"); !xdg.empty()) return xdg + "/morfredus/morfSync";
-    if (std::string home = env("HOME"); !home.empty())        return home + "/.local/share/morfredus/morfSync";
-    return "data";
+    return "/opt/morfsync/data";
 #endif
 }
 

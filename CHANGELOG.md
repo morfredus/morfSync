@@ -6,7 +6,16 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [0.3.0] - 2026-07-22
+### Modifié
+
+- **Données rangées selon la convention morfSystem** (`docs/FILESYSTEM.md`).
+  L'emplacement par défaut passe du dossier utilisateur
+  (`~/.local/share/morfredus/morfSync`) à `<app_dir>/data`
+  (`/opt/morfsync/data` sous Linux, `%ProgramData%\morfsync\data` sous Windows).
+  morfSync est un service, pas une application : ses données sont sa source de
+  vérité, personne ne les ouvre à la main, et toutes les opérations passent par
+  les consommateurs via le réseau. Le réglage `dataDir` reste prioritaire ; les
+  consommateurs ne voient aucune différence.
 
 ### Ajouté
 

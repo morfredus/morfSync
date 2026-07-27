@@ -1,10 +1,10 @@
 # Service systemd pour morfSync.
 #
-# Le service tourne EN TANT QUE L'UTILISATEUR (User=/Group=), pour que ses
-# données restent accessibles dans ~/.local/share/morfredus/morfSync
-# (et non dans /var/lib, réservé au root). Le script install-service.sh
-# remplace __RUN_USER__ et __RUN_HOME__ ; en installation manuelle, remplacez-les
-# vous-même (utilisateur + son répertoire home).
+# Le service tourne EN TANT QUE L'UTILISATEUR (User=/Group=). Ses données vivent
+# sous /opt/morfsync/data (convention morfSystem, docs/FILESYSTEM.md) : ce compte
+# doit donc avoir l'écriture sur ce dossier, que service.py provisionne. Le script
+# install-service.sh remplace __RUN_USER__ et __RUN_HOME__ ; en installation
+# manuelle, remplacez-les vous-même (utilisateur + son répertoire home).
 #
 # Nom d'unité : « morfsync ». Binaire et config dans __APP_DIR__
 # (/opt/morfsync par défaut), comme tous les autres services du parc :
@@ -27,7 +27,8 @@ User=__RUN_USER__
 Group=__RUN_USER__
 # $HOME et le dossier de travail sont imposés explicitement : pour un service
 # SYSTEM avec User=, systemd ne fournit pas toujours $HOME, et %h vaudrait /root.
-# Sans ça, le hub ne résout pas son dossier de données et plante (SIGABRT).
+# Les données ne dépendent plus de $HOME (elles vivent sous /opt/morfsync/data),
+# mais un HOME défini reste sain pour l'environnement du processus.
 Environment=HOME=__RUN_HOME__
 WorkingDirectory=__RUN_HOME__
 ExecStart=__APP_DIR__/morfSync __CONFIG_DIR__/morfsync.json
