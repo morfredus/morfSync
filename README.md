@@ -2,6 +2,8 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](CHANGELOG.md)
+
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Raspberry%20Pi-lightgrey)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus)
 ![Build](https://img.shields.io/badge/CMake-3.21+-064F8C?logo=cmake)
