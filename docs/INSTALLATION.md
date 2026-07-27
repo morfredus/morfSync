@@ -58,7 +58,7 @@ le système :
 
 Ces emplacements sont **accessibles à l'utilisateur** (contrairement à
 `/var/lib`). Le service systemd tourne donc **en tant que votre utilisateur**
-(`User=`), pas en compte dynamique — `service.py install` s'en charge
+(`User=`), pas en compte dynamique - `service.py install` s'en charge
 automatiquement. Le dossier retenu est affiché dans le journal au démarrage, et
 les données **survivent aux redémarrages** (le hub recharge les domaines
 existants au lancement).

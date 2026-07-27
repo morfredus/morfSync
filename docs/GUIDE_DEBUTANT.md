@@ -1,4 +1,4 @@
-# morfSync — Guide du débutant
+# morfSync - Guide du débutant
 
 Ce guide vous prend **par la main, de zéro**, pour faire fonctionner
 morfSync et vérifier qu'une machine peut communiquer avec lui sur votre
@@ -22,7 +22,7 @@ Trois idées à retenir :
 
 > **Important, à lire une fois :** aujourd'hui, ComponentHub ne se connecte pas
 > *encore* automatiquement au hub (c'est le prochain chantier). Ce guide vous
-> montre donc comment lancer le hub et **tester la communication à la main** —
+> montre donc comment lancer le hub et **tester la communication à la main** -
 > ce qui prouve que toute la plomberie réseau fonctionne.
 
 ---
@@ -34,13 +34,13 @@ Trois idées à retenir :
 - **Un autre poste** (Windows, portable…) qui servira de client de test.
 - Les deux **sur le même réseau local** (même box/routeur, en Wi-Fi ou câble).
 
-**Logiciels sur la machine hub** (pour compiler — une seule fois)
+**Logiciels sur la machine hub** (pour compiler - une seule fois)
 - Un compilateur **C++17**, **CMake** (≥ 3.21) et **Ninja**.
 - La bibliothèque **nlohmann-json** (seule dépendance externe).
 - **git**, pour récupérer le dépôt.
 
 **Pour tester** (envoyer des requêtes au hub)
-- **`curl`** — présent d'origine sur Linux/Raspberry, et sur Windows 10/11.
+- **`curl`** - présent d'origine sur Linux/Raspberry, et sur Windows 10/11.
   C'est la méthode recommandée, surtout sur un **Raspberry sans écran ni
   navigateur**.
 - Un **navigateur web** est pratique *si* la machine en a un (poste de bureau),
@@ -51,7 +51,7 @@ Trois idées à retenir :
 
 ---
 
-## Étape 1 — Choisir la machine « hub »
+## Étape 1 - Choisir la machine « hub »
 
 Choisissez **une** machine qui restera allumée : idéalement le **Raspberry Pi**.
 Les autres postes (Windows, portable…) seront des **clients** qui la contactent.
@@ -64,7 +64,7 @@ Notez, on en aura besoin :
 
 ---
 
-## Étape 2 — Récupérer et compiler morfSync
+## Étape 2 - Récupérer et compiler morfSync
 
 Sur la machine hub, ouvrez un terminal et placez-vous dans le dépôt.
 
@@ -89,7 +89,7 @@ Résultat : un fichier `build-mingw\morfSync.exe`.
 
 ---
 
-## Étape 3 — Premier lancement (test rapide, sans installation)
+## Étape 3 - Premier lancement (test rapide, sans installation)
 
 Avant d'installer quoi que ce soit, lançons le hub « à la main » pour voir
 qu'il démarre.
@@ -107,12 +107,12 @@ cd build-mingw
 
 Vous devez voir une ligne comme :
 ```
-morfSync 0.1.0 — écoute sur http://0.0.0.0:8080 (données: data, auth: désactivée)
+morfSync 0.1.0 - écoute sur http://0.0.0.0:8080 (données: data, auth: désactivée)
 ```
 🎉 Le hub tourne. **Laissez ce terminal ouvert** et ouvrez-en un **second** pour
 la suite.
 
-**Vérification — au terminal (fonctionne partout, même sur un Raspberry sans
+**Vérification - au terminal (fonctionne partout, même sur un Raspberry sans
 écran) :** dans le second terminal, tapez :
 ```bash
 curl http://localhost:8080/api/health
@@ -131,7 +131,7 @@ Pour arrêter le hub dans ce mode manuel : revenez au premier terminal et faites
 
 ---
 
-## Étape 4 — L'installer pour qu'il démarre tout seul
+## Étape 4 - L'installer pour qu'il démarre tout seul
 
 Une fois le test OK, installez-le en démarrage automatique pour ne plus avoir à
 le lancer à la main.
@@ -141,7 +141,7 @@ le lancer à la main.
 sudo ./service.py install
 ```
 
-**Sur Windows** — ouvrez **PowerShell en administrateur** (clic droit →
+**Sur Windows** - ouvrez **PowerShell en administrateur** (clic droit →
 « Exécuter en tant qu'administrateur »), puis :
 ```powershell
 .\scripts\windows\install-service.ps1
@@ -153,21 +153,21 @@ pare-feu, et un test final. Détails et désinstallation dans
 
 ---
 
-## Étape 5 — Le test qui compte : communiquer depuis un AUTRE poste
+## Étape 5 - Le test qui compte : communiquer depuis un AUTRE poste
 
 C'est ici qu'on prouve que le réseau fonctionne. On va, **depuis un second
 poste**, parler au hub qui tourne sur la machine choisie à l'étape 1.
 
 Remplacez `192.168.1.50` par l'**IP de la machine hub** (étape 1).
 
-**5.a — Le hub répond-il depuis l'autre poste ?**
+**5.a - Le hub répond-il depuis l'autre poste ?**
 ```bash
 curl http://192.168.1.50:8080/api/health
 ```
 Réponse attendue : `{"status":"ok", ...}`.
 Si ça bloque → voir la section « Ça ne marche pas » plus bas (souvent le pare-feu).
 
-**5.b — Envoyer une donnée (PUSH), puis la relire (PULL).**
+**5.b - Envoyer une donnée (PUSH), puis la relire (PULL).**
 On simule un composant envoyé par ce poste :
 ```bash
 curl -X POST http://192.168.1.50:8080/api/componenthub/changes \
@@ -183,11 +183,11 @@ Maintenant, relisez ce que le hub connaît :
 curl "http://192.168.1.50:8080/api/componenthub/changes?since=0"
 ```
 Vous devez retrouver votre composant « Test depuis le portable ».
-**Bravo — la communication fonctionne de bout en bout entre deux machines.** ✅
+**Bravo - la communication fonctionne de bout en bout entre deux machines.** ✅
 
 ---
 
-## Étape 6 — Régler le port ou ajouter un mot de passe (facultatif)
+## Étape 6 - Régler le port ou ajouter un mot de passe (facultatif)
 
 Ouvrez le fichier `config.json` :
 - Linux : `/etc/morfsync/config.json`
@@ -207,7 +207,7 @@ Si vous mettez un `token`, les clients devront ajouter l'en-tête
 
 ---
 
-## « Ça ne marche pas » — les cas les plus fréquents
+## « Ça ne marche pas » - les cas les plus fréquents
 
 | Symptôme | Cause probable | Solution |
 |----------|----------------|----------|

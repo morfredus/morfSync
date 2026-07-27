@@ -19,11 +19,11 @@ cohérentes sur le réseau local.
 
 ## Fonctionnement (en un paragraphe)
 
-Chaque entité synchronisable porte une enveloppe — `{ id (UUID), rev, updatedAt,
-deleted, origin }` — autour d'une charge utile métier opaque. Les clients
+Chaque entité synchronisable porte une enveloppe - `{ id (UUID), rev, updatedAt,
+deleted, origin }` - autour d'une charge utile métier opaque. Les clients
 **PUSH**ent leurs changements locaux, puis **PULL**ent tout depuis leur curseur
 (`GET /changes?since=N`). Le hub attribue un **numéro de séquence monotone** qui
-ordonne tout et arbitre les conflits en *last-write-wins* — il **ne compare
+ordonne tout et arbitre les conflits en *last-write-wins* - il **ne compare
 jamais les horloges** des machines (l'ESP32 dérive, le Raspberry Pi n'a pas de
 RTC). La spécification complète est dans [docs/sync-contract.md](docs/sync-contract.md).
 
@@ -42,7 +42,7 @@ demande. Auth optionnelle par jeton partagé via `Authorization: Bearer <token>`
 ## Choix de conception
 
 - **Aucun framework web.** Un serveur HTTP/1.1 minimal et autonome (winsock2 /
-  sockets POSIX). Seule dépendance externe : `nlohmann_json` — celle que
+  sockets POSIX). Seule dépendance externe : `nlohmann_json` - celle que
   ComponentHub utilise déjà. Compile indépendamment sur win-x64, Linux et ARM64.
 - **Agnostique au métier.** Le hub transporte des enveloppes ; il n'interprète
   jamais la charge `data`. Ajouter un projet ne demande aucune modification serveur.
@@ -113,4 +113,4 @@ test/         test de fumée headless
 
 ## Licence
 
-GPL-3.0-only — voir [LICENSE](LICENSE).
+GPL-3.0-only - voir [LICENSE](LICENSE).

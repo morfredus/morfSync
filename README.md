@@ -18,11 +18,11 @@ local network.
 
 ## How it works (in one paragraph)
 
-Every syncable entity carries an envelope — `{ id (UUID), rev, updatedAt,
-deleted, origin }` — around an opaque business payload. Clients **PUSH** their
+Every syncable entity carries an envelope - `{ id (UUID), rev, updatedAt,
+deleted, origin }` - around an opaque business payload. Clients **PUSH** their
 local changes, then **PULL** everything since their cursor (`GET
 /changes?since=N`). The hub assigns a **monotonic sequence number** that orders
-everything and resolves conflicts as last-write-wins — **it never compares wall
+everything and resolves conflicts as last-write-wins - **it never compares wall
 clocks between machines** (the ESP32 drifts, the Raspberry Pi has no RTC). The
 full specification lives in [docs/sync-contract.md](docs/sync-contract.md).
 
@@ -41,7 +41,7 @@ demand. Optional shared-token auth via `Authorization: Bearer <token>`.
 ## Design choices
 
 - **Zero web framework.** A minimal, self-contained HTTP/1.1 server (winsock2 /
-  POSIX sockets). Only external dependency: `nlohmann_json` — the same one
+  POSIX sockets). Only external dependency: `nlohmann_json` - the same one
   ComponentHub already uses. Compiles independently on win-x64, Linux and ARM64.
 - **Business-agnostic.** The hub transports envelopes; it never interprets the
   `data` payload. Adding a new project needs no server change.
@@ -111,4 +111,4 @@ test/         headless smoke test
 
 ## License
 
-GPL-3.0-only — see [LICENSE](LICENSE).
+GPL-3.0-only - see [LICENSE](LICENSE).

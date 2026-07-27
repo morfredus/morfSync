@@ -3,7 +3,7 @@
 ## Principe directeur
 morfSync reste **léger et agnostique au métier**. Il transporte des
 enveloppes de synchronisation ; il n'interprète jamais leur contenu. Toute
-évolution doit respecter [docs/sync-contract.md](docs/sync-contract.md) — le
+évolution doit respecter [docs/sync-contract.md](docs/sync-contract.md) - le
 contrat est la source de vérité partagée par tous les clients de l'écosystème.
 
 ## Avant de coder

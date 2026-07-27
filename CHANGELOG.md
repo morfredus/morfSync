@@ -6,7 +6,7 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [0.3.0] – 2026-07-22
+## [0.3.0] - 2026-07-22
 
 ### Ajouté
 
@@ -19,7 +19,7 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 ### Modifié
 
-- **La configuration revient dans `/etc/morfsync`**, à sa place selon la FHS —
+- **La configuration revient dans `/etc/morfsync`**, à sa place selon la FHS -
   morfSync y était déjà avant d'être aligné par erreur sur les autres. Le
   déplacement est déclaré (`migrate_from`) : la config existante est adoptée,
   jamais écrasée. Le binaire va dans `/opt/morfsync`.
@@ -30,7 +30,7 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 
 - Documentation de version alignée sur les liens de dépôt de production.
 
-## [0.2.9] – 2026-07-19
+## [0.2.9] - 2026-07-19
 
 ### Corrigé
 
@@ -57,8 +57,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
 > aux autres services de l'écosystème, il n'y a rien à resynchroniser ici. Le
 > sujet du commit précédent mentionne à tort une resynchronisation de morfBeacon.
 
-## [0.2.8] — 2026-07-15
-### Modifié — renommage HomeServerHub → morfSync
+## [0.2.8] - 2026-07-15
+### Modifié - renommage HomeServerHub → morfSync
 
 Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…).
 - **Produit / binaire / cible CMake** : `morfSync` (le binaire s'appelle désormais `morfSync`).
@@ -74,7 +74,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
 > dossier de données change de nom : la détection d'époque (0.2.5) fait que les
 > clients se re-synchronisent tout seuls.
 
-## [0.2.7] — 2026-07-15
+## [0.2.7] - 2026-07-15
 ### Corrigé
 - `update-service.sh --build` **choisit le bon preset selon l'architecture** :
   `linux-arm64` (dossier `build-arm64`) sur un Raspberry Pi 64 bits, `linux`
@@ -82,10 +82,10 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
   être forcé en argument (`--build linux-arm64-cross`). Documentation de mise à
   jour ajustée en conséquence.
 
-## [0.2.6] — 2026-07-15
+## [0.2.6] - 2026-07-15
 ### Ajouté
 - Option **`--version` / `-v`** : affiche la version sans démarrer le serveur
-  (vérification fiable — le nom et le numéro sont stockés séparément dans le
+  (vérification fiable - le nom et le numéro sont stockés séparément dans le
   binaire, donc introuvables par un simple `grep`).
 
 ### Corrigé
@@ -96,7 +96,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
 - Documentation : procédure de mise à jour **complète et fiable** dans
   `docs/INSTALLATION.md` (build neuf + vérification via `--version`).
 
-## [0.2.5] — 2026-07-15
+## [0.2.5] - 2026-07-15
 ### Ajouté
 - **Identité de journal (« époque ») par domaine** : un `journalId` stable est
   généré à la création d'un journal et exposé dans la réponse de `GET
@@ -106,7 +106,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
   changements. Corrige le cas « une suppression n'est pas propagée aux autres
   postes après un déménagement des données du hub ».
 
-## [0.2.4] — 2026-07-15
+## [0.2.4] - 2026-07-15
 ### Corrigé
 - Le service systemd impose désormais `HOME` et `WorkingDirectory` (via
   `__RUN_HOME__`, injecté par `install-service.sh`) : un service SYSTEM avec
@@ -114,7 +114,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
   dossier de données (`%h` vaudrait `/root`). Défense en profondeur, en plus du
   garde-fou d'écriture et de la migration de config de la 0.2.3.
 
-## [0.2.3] — 2026-07-15
+## [0.2.3] - 2026-07-15
 ### Corrigé
 - **Plus de boucle de redémarrage** quand le dossier de données est
   inaccessible : au lieu d'une exception non catchée (crash → relance en
@@ -126,7 +126,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
   C'était la cause du service qui démarrait puis s'arrêtait après passage en
   `User=`.
 
-## [0.2.2] — 2026-07-15
+## [0.2.2] - 2026-07-15
 ### Ajouté
 - `scripts/linux/update-service.sh` : met à jour le binaire du service (avec
   `--build` optionnel), arrête/remplace/redémarre, sans toucher config ni
@@ -139,7 +139,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
   sous `%ProgramData%\morfSync\data`) au lieu du profil caché du compte
   SYSTEM.
 
-## [0.2.1] — 2026-07-15
+## [0.2.1] - 2026-07-15
 ### Modifié
 - **Dossier de données par défaut accessible à l'utilisateur.** Auparavant, le
   service systemd (`DynamicUser` + `StateDirectory`) écrivait dans
@@ -151,7 +151,7 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
   plus en `DynamicUser` ; `install-service.sh` injecte l'utilisateur courant et
   pré-crée le dossier. (`dataDir` explicite dans `config.json` reste prioritaire.)
 
-## [0.2.0] — 2026-07-15
+## [0.2.0] - 2026-07-15
 ### Ajouté
 - Stockage des données à l'emplacement conforme à l'OS quand `dataDir` n'est pas
   précisé : `$STATE_DIRECTORY` (service systemd) puis XDG sous Linux,
@@ -169,12 +169,12 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
 ### Modifié
 - PUSH **idempotent** : un renvoi à l'identique (même `rev` + `updatedAt`) est un
   no-op sans nouveau `seq`, et une version plus ancienne ne peut plus écraser une
-  plus récente — résolution déterministe *highest-rev puis updatedAt* (au lieu du
+  plus récente - résolution déterministe *highest-rev puis updatedAt* (au lieu du
   last-write-wins par arrivée). Permet au client de re-pousser sans générer de
   bruit ; combiné au PUSH incrémental côté ComponentHub, la synchro passe à
   l'échelle.
 
-## [0.1.0] — 2026-07-15
+## [0.1.0] - 2026-07-15
 ### Ajouté
 - Scaffold initial du socle de synchronisation offline-first de l'écosystème *morf*.
 - Serveur HTTP/1.1 minimal, autonome et cross-plateforme (winsock2 / sockets

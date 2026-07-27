@@ -1,12 +1,12 @@
-# morfSync — Contrat de synchronisation (v1)
+# morfSync - Contrat de synchronisation (v1)
 
 > Document de référence de l'écosystème. Tous les projets clients (ComponentHub,
 > MeteoHub, morfDashboard, SiteWatch, morfBeacon, morfUpdate…) suivent ce
 > contrat. Il définit **le modèle de données synchronisable**, **le protocole
-> REST**, et **l'interface de stockage** — rien d'autre. Le reste de chaque
+> REST**, et **l'interface de stockage** - rien d'autre. Le reste de chaque
 > application ignore totalement comment la synchro fonctionne.
 
-Statut : **v1 — draft à valider**. Philosophie : *offline-first*, simple,
+Statut : **v1 - draft à valider**. Philosophie : *offline-first*, simple,
 last-write-wins arbitré par le serveur. On ne complexifie pas tant que ce socle
 ne fait pas mal.
 
@@ -31,8 +31,8 @@ mesure météo…) porte le même bloc de métadonnées. C'est le seul contrat c
   // --- enveloppe (universelle, gérée par la couche sync) ---
   "id":         "550e8400-e29b-41d4-a716-446655440000", // UUID v4, permanent
   "type":       "component",        // discriminant d'entité
-  "createdAt":  "2026-07-14T10:12:00Z", // ISO 8601 UTC — affichage seulement
-  "updatedAt":  "2026-07-14T11:47:33Z", // ISO 8601 UTC — affichage seulement
+  "createdAt":  "2026-07-14T10:12:00Z", // ISO 8601 UTC - affichage seulement
+  "updatedAt":  "2026-07-14T11:47:33Z", // ISO 8601 UTC - affichage seulement
   "deleted":    false,              // tombstone
   "rev":        7,                  // compteur de révision local, incrémenté à chaque save
   "origin":     "windows-fred",     // deviceId ayant produit cette révision
@@ -64,7 +64,7 @@ mesure météo…) porte le même bloc de métadonnées. C'est le seul contrat c
 ## 2. Le journal de changements (cœur du protocole)
 
 Le serveur ne « pense » pas la logique métier. Il tient **un unique journal
-ordonné** par domaine (ou global — au choix, commencer global). Chaque changement
+ordonné** par domaine (ou global - au choix, commencer global). Chaque changement
 reçu se voit attribuer un **numéro de séquence monotone `seq`** (entier, jamais
 réutilisé, jamais remis à zéro).
 
@@ -91,7 +91,7 @@ la source de vérité de l'**ordre**.
 
 Deux appareils modifient la même entité `id` hors ligne, puis se synchronisent.
 
-**Règle v1 — Last-Write-Wins arbitré par le serveur :**
+**Règle v1 - Last-Write-Wins arbitré par le serveur :**
 
 > Quand le serveur reçoit un PUSH pour une entité `id` qui existe déjà, la
 > version poussée **remplace** l'état courant et reçoit un nouveau `seq`
@@ -126,7 +126,7 @@ GET /api/health
 ```
 Utilisé par « tester la connexion » et « voir l'état du serveur » dans les préférences client.
 
-### 4.2 PULL — récupérer les changements
+### 4.2 PULL - récupérer les changements
 ```
 GET /api/{domain}/changes?since={lastSeq}&limit={n}
 → 200 {
@@ -142,7 +142,7 @@ GET /api/{domain}/changes?since={lastSeq}&limit={n}
 - `since=0` → réplication initiale complète (tombstones compris).
 - Pagination via `limit` + `hasMore` : indispensable pour l'ESP32 et le premier sync.
 
-### 4.3 PUSH — envoyer ses changements locaux
+### 4.3 PUSH - envoyer ses changements locaux
 ```
 POST /api/{domain}/changes
 body { "deviceId": "windows-fred",
@@ -208,9 +208,9 @@ interface IStorage<T> {
 ```
 
 ### 6.2 Implémentations prévues
-- **`JsonStorage`** — la base locale (aujourd'hui). Aucune dépendance réseau.
-- **`SyncStorage`** — décorateur : délègue à `JsonStorage` pour tout, et déclenche/gère la synchro réseau. L'app ne voit qu'un `IStorage`.
-- **`SqliteStorage`** (plus tard) — remplace `JsonStorage` sans toucher au reste.
+- **`JsonStorage`** - la base locale (aujourd'hui). Aucune dépendance réseau.
+- **`SyncStorage`** - décorateur : délègue à `JsonStorage` pour tout, et déclenche/gère la synchro réseau. L'app ne voit qu'un `IStorage`.
+- **`SqliteStorage`** (plus tard) - remplace `JsonStorage` sans toucher au reste.
 
 ### 6.3 Esquisse C++ pour ComponentHub (aligne sur l'existant)
 
@@ -262,11 +262,11 @@ function sync(domain):
 Réseau local privé → pas de sur-ingénierie.
 - Un **token partagé statique** (`Bearer`) configuré côté serveur et dans chaque client suffit pour v1.
 - Pas de comptes, pas d'OAuth, pas de sessions tant que le besoin n'existe pas.
-- `morfSync` pourra fournir plus tard une vraie authentification comme *service commun* — sans changer ce contrat de synchro.
+- `morfSync` pourra fournir plus tard une vraie authentification comme *service commun* - sans changer ce contrat de synchro.
 
 ---
 
-## 8. Cas particulier : appareils embarqués (ESP32 — MeteoHub, morfBeacon)
+## 8. Cas particulier : appareils embarqués (ESP32 - MeteoHub, morfBeacon)
 
 Le **contrat** (enveloppe + REST) reste identique. L'**implémentation** de
 `IStorage` diffère : un ESP32 ne réplique pas une base complète.
@@ -307,5 +307,5 @@ Le seul vrai chantier de bascule. Une passe unique, une fois :
 > Chaque entité porte `{id(uuid), rev, updatedAt, deleted, origin}` ; le client
 > travaille en local et, quand le serveur est là, il **PUSH ses changements puis
 > PULL depuis son curseur `lastSeq`** ; le serveur attribue un `seq` monotone qui
-> **ordonne tout** et **arbitre les conflits en last-write-wins** — sans jamais
+> **ordonne tout** et **arbitre les conflits en last-write-wins** - sans jamais
 > comparer les horloges des machines.
