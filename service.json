@@ -31,5 +31,10 @@
   "config_dir": {
     "linux": "/etc/morfsystem/morfsync",
     "windows": "%ProgramData%/morfsystem/morfsync"
+  },
+  "_comment_state_dir": "ETAT PERSISTANT (docs/FILESYSTEM.md) : journaux de synchro par domaine sous /var/lib/morfsystem/morfsync, distinct de la config (/etc, admin) et du programme (/opt). L'unite declare StateDirectory=morfsystem/morfsync : systemd cree ce dossier possede par le user du service, expose via $STATE_DIRECTORY. La cle 'dataDir' du fichier de config permet de surcharger cet emplacement.",
+  "state_dir": {
+    "linux": "/var/lib/morfsystem/morfsync",
+    "windows": "%ProgramData%/morfsystem/morfsync/state"
   }
 }

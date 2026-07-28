@@ -13,16 +13,25 @@ std::string env(const char* name) {
 } // namespace
 
 std::string defaultDataDir() {
-    // Données MÉTIER du service (source de vérité), rangées selon la convention
-    // morfSystem : <app_dir>/data (docs/FILESYSTEM.md). morfSync est un service,
-    // pas une application utilisateur : personne n'ouvre ces fichiers à la main,
-    // toutes les opérations (lecture, suppression) passent par les consommateurs
-    // via le réseau. Les données vivent donc sous /opt, pas dans le home.
+    // Données MÉTIER du service (journaux de synchro par domaine) : c'est de
+    // l'ÉTAT PERSISTANT généré par le service, pas de la config. Il vit donc sous
+    // /var/lib, distinct du programme (/opt) et de la config admin (/etc), selon
+    // la doctrine du parc (docs/FILESYSTEM.md).
+    //
+    // Sous systemd, l'unité déclare StateDirectory=morfsystem/morfsync : systemd
+    // crée /var/lib/morfsystem/morfsync possédé par le User= du service et
+    // l'expose via $STATE_DIRECTORY. On l'utilise en priorité (aucun problème de
+    // droits à rattraper) ; la variable peut lister plusieurs chemins séparés par
+    // ':', le premier est la racine.
+    if (std::string sd = env("STATE_DIRECTORY"); !sd.empty()) {
+        const std::string first = sd.substr(0, sd.find(':'));
+        if (!first.empty()) return first;
+    }
 #if defined(_WIN32)
-    if (std::string pd = env("PROGRAMDATA"); !pd.empty())   return pd + "\\morfsync\\data";
+    if (std::string pd = env("PROGRAMDATA"); !pd.empty())   return pd + "\\morfsystem\\morfsync\\state";
     return "data";
 #else
-    return "/opt/morfsync/data";
+    return "/var/lib/morfsystem/morfsync";
 #endif
 }
 

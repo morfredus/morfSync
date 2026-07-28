@@ -1,10 +1,11 @@
 # Service systemd pour morfSync.
 #
-# Le service tourne EN TANT QUE L'UTILISATEUR (User=/Group=). Ses données vivent
-# sous /opt/morfsync/data (convention morfSystem, docs/FILESYSTEM.md) : ce compte
-# doit donc avoir l'écriture sur ce dossier, que service.py provisionne. Le script
-# install-service.sh remplace __RUN_USER__ et __RUN_HOME__ ; en installation
-# manuelle, remplacez-les vous-même (utilisateur + son répertoire home).
+# Le service tourne EN TANT QUE L'UTILISATEUR (User=/Group=). Ses données sont de
+# l'ÉTAT PERSISTANT sous /var/lib/morfsystem/morfsync (doctrine morfSystem,
+# docs/FILESYSTEM.md) : StateDirectory= fait créer ce dossier par systemd, possédé
+# par User= et accessible en écriture, puis l'expose via $STATE_DIRECTORY. Plus
+# besoin de provisionner les droits à la main. morfdeploy remplace __RUN_USER__,
+# __RUN_HOME__, __APP_DIR__ et __CONFIG_DIR__.
 #
 # Nom d'unité : « morfsync ». Binaire et config dans __APP_DIR__
 # (/opt/morfsync par défaut), comme tous les autres services du parc :
@@ -31,6 +32,9 @@ Group=__RUN_USER__
 # mais un HOME défini reste sain pour l'environnement du processus.
 Environment=HOME=__RUN_HOME__
 WorkingDirectory=__RUN_HOME__
+# Crée et possède /var/lib/morfsystem/morfsync ; expose $STATE_DIRECTORY, que
+# paths.cpp utilise comme dossier de données par défaut.
+StateDirectory=morfsystem/morfsync
 ExecStart=__APP_DIR__/morfSync __CONFIG_DIR__/morfsync.json
 Restart=on-failure
 RestartSec=3

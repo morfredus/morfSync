@@ -4,6 +4,24 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.5.0] - 2026-07-28
+
+### Modifié
+
+- **Données déplacées sous `/var/lib/morfsystem/morfsync`** (doctrine du parc,
+  voir `docs/FILESYSTEM.md`). Les journaux de synchro par domaine sont de
+  l'**état persistant** généré par le service, distinct du programme (`/opt`) et
+  de la config admin (`/etc`) : ils ne vivent plus sous `/opt/morfsync/data`.
+  L'unité systemd déclare `StateDirectory=morfsystem/morfsync`, que systemd crée
+  possédé par l'utilisateur du service et expose via `$STATE_DIRECTORY` ; le
+  dossier de données par défaut suit cette variable. Plus besoin de provisionner
+  les droits à la main. La clé `dataDir` de la configuration reste prioritaire
+  pour un emplacement explicite.
+  - **Migration** : une installation antérieure garde ses données sous
+    `/opt/morfsync/data`. Les déplacer avant de démarrer cette version :
+    `sudo systemctl stop morfsync && sudo mv /opt/morfsync/data/* /var/lib/morfsystem/morfsync/ 2>/dev/null; sudo systemctl start morfsync`
+    (ou fixer `dataDir` sur l'ancien chemin dans la config).
+
 ## [0.4.0] - 2026-07-28
 
 ### Modifié
