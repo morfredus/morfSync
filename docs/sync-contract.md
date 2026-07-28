@@ -167,6 +167,37 @@ body { "deviceId": "windows-fred",
 ```
 > On PUSH avant de PULL : ainsi le PULL renvoie un état déjà cohérent incluant nos propres écritures avec leur `seq` définitif.
 
+### 4.5 Blobs - le binaire des pièces jointes (adressé par contenu)
+
+Le journal de changements ne transporte que du JSON : il ne doit PAS grossir avec
+le contenu binaire des pièces jointes (une datasheet, une photo). Ce contenu
+voyage à part, dans un magasin **adressé par contenu**. Un blob est identifié par
+le **SHA-256** (64 hex) de ses octets ; le changement d'un document ne porte que
+cette référence de hash, jamais les octets.
+
+```
+HEAD /api/blob/{hash}   → 200 si présent, 404 sinon (aucun corps)
+GET  /api/blob/{hash}   → 200 application/octet-stream (les octets), ou 404
+PUT  /api/blob/{hash}   body = octets bruts
+                        → 201 si stocké, 200/201 si déjà présent (idempotent),
+                          400 hash mal formé / corps vide, 413 trop volumineux
+```
+
+- **Adressage par contenu = idempotence et dédoublonnage** : deux documents au
+  contenu identique partagent un seul blob ; un blob déjà présent n'est jamais
+  re-téléversé (le client teste par `HEAD` avant de `PUT`).
+- **Le hub ne recalcule pas le hash** (il reste sans dépendance crypto) : il
+  traite `{hash}` comme une clé opaque. **L'intégrité est vérifiée par le
+  client** au téléchargement (il re-hache ce qu'il reçoit et compare). Sur un LAN
+  de confiance à token partagé (§7), c'est le bon compromis.
+- **Ordre** : le transfert des blobs suit la synchro des métadonnées. À la fin de
+  §4.4, pour chaque document de nature « fichier » : au PUSH, `PUT` les blobs que
+  le hub n'a pas (`HEAD` négatif) ; au PULL, `GET` les blobs référencés absents
+  du magasin local. Un blob manquant ne bloque pas la synchro des métadonnées :
+  la référence reste valide, le contenu se récupère à la prochaine passe.
+- **Plafond** : le hub refuse (`413`) un blob au-delà d'une taille de garde-fou
+  (64 Mio), le corps étant lu d'un bloc en mémoire.
+
 ---
 
 ## 5. Identité de l'appareil et curseur

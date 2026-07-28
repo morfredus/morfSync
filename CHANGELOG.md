@@ -4,6 +4,20 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.6.0] - 2026-07-28
+
+### Ajouté
+
+- **Magasin de blobs adressé par contenu** pour transporter le binaire des pièces
+  jointes entre postes sans alourdir le journal de changements (celui-ci ne garde
+  que la référence de hash). Trois endpoints sous `/api/blob/{hash}` : `HEAD`
+  (présence), `GET` (télécharger), `PUT` (téléverser, idempotent). Le hash est le
+  SHA-256 du contenu ; le hub le traite comme une clé opaque et ne le recalcule
+  pas (aucune dépendance crypto ajoutée), l'intégrité étant vérifiée par le client
+  au téléchargement. Blobs rangés sous `{dataDir}/blobs/`, écriture atomique,
+  plafond de garde-fou à 64 Mio. Voir `docs/sync-contract.md` §4.5 et
+  `src/sync/blob_store.h`.
+
 ## [0.5.0] - 2026-07-28
 
 ### Modifié

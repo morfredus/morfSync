@@ -95,6 +95,7 @@ const char* statusText(int code) {
         case 401: return "Unauthorized";
         case 404: return "Not Found";
         case 405: return "Method Not Allowed";
+        case 413: return "Payload Too Large";
         case 500: return "Internal Server Error";
         default:  return "OK";
     }

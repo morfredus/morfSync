@@ -21,6 +21,7 @@
 #include "net/http_server.h"
 #include "net/beacon.h"
 #include "sync/change_store.h"
+#include "sync/blob_store.h"
 #include "app/config.h"
 #include "app/paths.h"
 
@@ -156,6 +157,16 @@ int main(int argc, char** argv) {
 
     Registry registry(cfg.dataDir);
     const int preloaded = registry.preload();
+
+    // Magasin de blobs : le binaire des pièces jointes, adressé par contenu, à
+    // côté des journaux par domaine mais distinct d'eux (le journal ne porte que
+    // la référence de hash). Voir sync/blob_store.h et docs/sync-contract.md §5.
+    hsh::BlobStore blobs(cfg.dataDir);
+    // Garde-fou : une pièce jointe d'inventaire (datasheet, photo) reste modeste.
+    // Le plafond protège la mémoire du hub (le corps est lu d'un bloc) sans gêner
+    // l'usage réel.
+    constexpr std::size_t kMaxBlobBytes = 64ull * 1024 * 1024;
+
     hsh::HttpServer server(cfg.host, cfg.port);
 
     // Vérifie le Bearer partagé si un token est configuré. Renvoie true si OK.
@@ -271,6 +282,63 @@ int main(int argc, char** argv) {
 
         json body{{"applied", applied}, {"conflicts", conflicts}, {"lastSeq", res.lastSeq}};
         return hsh::HttpResponse::json(200, body.dump());
+    });
+
+    // --- Magasin de blobs : binaire des pièces jointes (adressé par contenu) --
+    // Le journal de changements ne transporte QUE la métadonnée du document (dont
+    // la référence de hash) ; le contenu voyage ici, à la demande, une seule fois
+    // par hash. Adressage par contenu = idempotence et dédoublonnage naturels.
+
+    // HEAD /api/blob/:hash — présence, sans corps. Permet à un client de ne
+    // téléverser que les blobs que le hub n'a pas déjà.
+    server.route("HEAD", "/api/blob/:hash",
+                 [&blobs, &authorized](const hsh::HttpRequest& req) {
+        if (!authorized(req))
+            return hsh::HttpResponse::json(401, R"({"error":"unauthorized"})");
+        const std::string h = req.param("hash");
+        if (!hsh::BlobStore::validHash(h))
+            return hsh::HttpResponse::json(400, R"({"error":"invalid hash"})");
+        hsh::HttpResponse r;
+        r.status = blobs.has(h) ? 200 : 404;
+        r.contentType = "application/octet-stream";
+        return r;  // corps vide : c'est une requête de présence
+    });
+
+    // GET /api/blob/:hash — télécharger le contenu.
+    server.route("GET", "/api/blob/:hash",
+                 [&blobs, &authorized](const hsh::HttpRequest& req) {
+        if (!authorized(req))
+            return hsh::HttpResponse::json(401, R"({"error":"unauthorized"})");
+        const std::string h = req.param("hash");
+        if (!hsh::BlobStore::validHash(h))
+            return hsh::HttpResponse::json(400, R"({"error":"invalid hash"})");
+        std::string bytes;
+        if (!blobs.get(h, bytes))
+            return hsh::HttpResponse::json(404, R"({"error":"not found"})");
+        hsh::HttpResponse r;
+        r.status = 200;
+        r.contentType = "application/octet-stream";
+        r.body = std::move(bytes);
+        return r;
+    });
+
+    // PUT /api/blob/:hash — téléverser le contenu. Idempotent : un blob déjà
+    // présent n'est pas réécrit. Le hub ne recalcule pas le hash (clé opaque) ;
+    // le client vérifie l'intégrité au téléchargement.
+    server.route("PUT", "/api/blob/:hash",
+                 [&blobs, &authorized](const hsh::HttpRequest& req) {
+        if (!authorized(req))
+            return hsh::HttpResponse::json(401, R"({"error":"unauthorized"})");
+        const std::string h = req.param("hash");
+        if (!hsh::BlobStore::validHash(h))
+            return hsh::HttpResponse::json(400, R"({"error":"invalid hash"})");
+        if (req.body.empty())
+            return hsh::HttpResponse::json(400, R"({"error":"empty body"})");
+        if (req.body.size() > kMaxBlobBytes)
+            return hsh::HttpResponse::json(413, R"({"error":"blob too large"})");
+        if (!blobs.put(h, req.body))
+            return hsh::HttpResponse::json(500, R"({"error":"store failed"})");
+        return hsh::HttpResponse::json(201, R"({"status":"ok"})");
     });
 
     std::cout << "morfSync " << MS_VERSION
