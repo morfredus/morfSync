@@ -80,8 +80,8 @@ dans le dossier courant) :
 
 | Système | Emplacement de `config.json` |
 |---------|------------------------------|
-| Linux (service) | `/etc/morfsync/config.json` |
-| Windows (tâche)  | `C:\ProgramData\morfSync\config.json` |
+| Linux (service) | `/etc/morfsystem/morfsync/config.json` |
+| Windows (tâche)  | `C:\ProgramData\morfsystem\morfsync\config.json` |
 
 Après modification de la config, **redémarrez** le service (voir plus bas).
 
@@ -98,7 +98,7 @@ sudo ./service.py install
 ```
 
 Le script : installe le binaire dans `/usr/local/bin`, crée
-`/etc/morfsync/config.json` (s'il n'existe pas), installe le service,
+`/etc/morfsystem/morfsync/config.json` (s'il n'existe pas), installe le service,
 l'active au démarrage, le lance, et teste `/api/health`.
 
 Désinstallation :
@@ -110,8 +110,8 @@ sudo ./service.py uninstall
 
 ```bash
 sudo install -m 0755 build/morfSync /usr/local/bin/morfSync
-sudo mkdir -p /etc/morfsync
-sudo cp config.example.json /etc/morfsync/config.json     # puis éditez-le
+sudo mkdir -p /etc/morfsystem/morfsync
+sudo cp config.example.json /etc/morfsystem/morfsync/config.json     # puis éditez-le
 sudo cp scripts/linux/morfsync.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now morfsync                       # nom en minuscules
@@ -150,7 +150,7 @@ remplacement de `/usr/local/bin/morfSync` et redémarrage. Le script affiche
 la version du nouveau binaire et la transition (ex. `0.2.5 -> 0.2.6`).
 
 La mise à jour **complète aussi la configuration** : les valeurs déjà présentes
-dans `/etc/morfsync/config.json` ne sont jamais modifiées, mais les paramètres
+dans `/etc/morfsystem/morfsync/config.json` ne sont jamais modifiées, mais les paramètres
 apparus depuis l'installation y sont ajoutés puis listés à l'écran. Sans cela,
 un réglage introduit par une nouvelle version resterait absent indéfiniment et
 la fonction correspondante ne s'activerait jamais, en silence. Une sauvegarde

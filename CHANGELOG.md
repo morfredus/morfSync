@@ -4,10 +4,17 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.4.0] - 2026-07-28
 
 ### Modifié
 
+- **Configuration regroupée sous `/etc/morfsystem/<service>`.** Tout le parc
+  partage désormais un point d'entrée UNIQUE dans `/etc` (`/etc/morfsystem/`),
+  qui contient le fichier partagé `morfsystem.json` et un sous-dossier par
+  service, au lieu d'un `/etc/<service>` par service à la racine de `/etc`. Sous
+  Windows : `%ProgramData%\morfsystem\<service>`. Les données restent sous
+  `/opt/<service>`. L'ancien `/etc/<service>` est adopté à l'installation
+  (`migrate_from`).
 - **Données rangées selon la convention morfSystem** (`docs/FILESYSTEM.md`).
   L'emplacement par défaut passe du dossier utilisateur
   (`~/.local/share/morfredus/morfSync`) à `<app_dir>/data`
@@ -16,6 +23,8 @@ versionnage [SemVer](https://semver.org/lang/fr/).
   vérité, personne ne les ouvre à la main, et toutes les opérations passent par
   les consommateurs via le réseau. Le réglage `dataDir` reste prioritaire ; les
   consommateurs ne voient aucune différence.
+
+## [0.3.0] - 2026-07-22
 
 ### Ajouté
 
@@ -200,7 +209,8 @@ Le projet est renommé **morfSync** (famille *morf* : morfBeacon, morfUpdate…)
 - Contrat de synchronisation versionné dans `docs/sync-contract.md`.
 - Service systemd et README bilingue (EN/FR).
 
-[Non publié]: https://github.com/morfredus/morfSync/compare/v0.2.8...HEAD
+[0.4.0]: https://github.com/morfredus/morfSync/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/morfredus/morfSync/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/morfredus/morfSync/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/morfredus/morfSync/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/morfredus/morfSync/compare/v0.2.5...v0.2.6

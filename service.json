@@ -14,6 +14,7 @@
       "source": "config.example.json",
       "dest": "morfsync.json",
       "migrate_from": [
+        "/etc/morfsync/morfsync.json",
         "/opt/morfsync/morfsync.json",
         "/etc/morfsync/config.json",
         "/etc/homeserverhub/config.json"
@@ -26,9 +27,9 @@
   ],
   "status_url": "http://127.0.0.1:8080/status",
   "_comment_status": "morfSync now serves /status per morfbeacon/1, alongside the /api/status its synchronisation clients already call. Both are kept: replacing one with the other would break callers to tidy a naming.",
-  "_comment_config_dir": "La configuration vit dans /etc, pas a cote du binaire : c'est ou un administrateur Linux regarde en premier, et la FHS est explicite la-dessus. Effacer /opt/<service> pour reinstaller proprement n'emporte donc plus les reglages.",
+  "_comment_config_dir": "La configuration vit sous /etc/morfsystem/<service> : un point d'entree UNIQUE dans /etc pour tout le parc, et non a cote du binaire dans /opt. Effacer /opt/<service> pour reinstaller proprement n'emporte donc pas les reglages.",
   "config_dir": {
-    "linux": "/etc/morfsync",
-    "windows": "%ProgramData%/morfsync"
+    "linux": "/etc/morfsystem/morfsync",
+    "windows": "%ProgramData%/morfsystem/morfsync"
   }
 }

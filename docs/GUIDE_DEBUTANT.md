@@ -190,7 +190,7 @@ Vous devez retrouver votre composant « Test depuis le portable ».
 ## Étape 6 - Régler le port ou ajouter un mot de passe (facultatif)
 
 Ouvrez le fichier `config.json` :
-- Linux : `/etc/morfsync/config.json`
+- Linux : `/etc/morfsystem/morfsync/config.json`
 - Windows : `C:\ProgramData\morfSync\config.json`
 
 Changez par exemple le port, ou ajoutez un jeton :
