@@ -4,6 +4,22 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.6.2] - 2026-08-14
+
+### Corrigé
+
+- Description de l'unité systemd : remplacement du tiret cadratin par un tiret
+  simple, conformément à la règle de ponctuation du parc.
+
+## [0.6.1] - 2026-08-14
+
+### Modifié
+
+- Ajout du marqueur de version manquant à la copie vendorée de **morfdeploy**
+  (`third_party/morf/morfdeploy/VERSION` = 0.1.0), pour l'aligner sur le dépôt
+  source `morfDeploy`. Le code Python vendoré était déjà à jour ; changement de
+  forme uniquement.
+
 ## [0.6.0] - 2026-07-28
 
 ### Ajouté

@@ -18,7 +18,7 @@
 #   sudo systemctl daemon-reload && sudo systemctl enable --now morfsync
 
 [Unit]
-Description=morfSync — socle de synchronisation offline-first
+Description=morfSync - socle de synchronisation offline-first
 After=network-online.target
 Wants=network-online.target
 
