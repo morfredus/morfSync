@@ -4,6 +4,15 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.6.3] - 2026-08-18
+
+### Ajouté
+
+- **Déclaration de dépendance de build** dans `service.json` :
+  `build_dependencies` = `nlohmann-json` (requis, `find_package(nlohmann_json)`).
+  morfDeploy 0.9.0 le résout avant le build (Debian : `nlohmann-json3-dev` ; sur
+  une toolchain sans gestionnaire, annonce le besoin). Aucun changement de code.
+
 ## [0.6.2] - 2026-08-14
 
 ### Corrigé
