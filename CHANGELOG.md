@@ -4,6 +4,13 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.0] - 2026-08-20
+
+### Ajouté
+
+- Mise à jour de la copie vendorée de morfDeploy 0.14.0 pour le packaging avec
+  provenance vérifiée.
+
 ## [0.6.3] - 2026-08-18
 
 ### Ajouté
