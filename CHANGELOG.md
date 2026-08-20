@@ -4,6 +4,13 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.1] - 2026-08-20
+
+### Corrigé
+
+- Le paquet Windows est créé aussi lorsque l'exécutable MinGW ne requiert pas
+  Qt : la collecte des DLL de toolchain reste appliquée.
+
 ## [0.7.0] - 2026-08-20
 
 ### Ajouté
