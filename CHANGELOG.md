@@ -4,6 +4,18 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.3] - 2026-08-21
+
+### Ajouté
+
+- Enregistrement des compilations au niveau CMake (record_compile) : la durée de compile est signalée à morfAnalytics quel que soit le déclencheur (cmake --build direct, morf upgrade, déploiement morfDeploy).
+
+## [0.7.2] - 2026-08-21
+
+### Modifié
+
+- Resynchroniser la copie vendorée de morfdeploy vers 0.17.3.
+
 ## [0.7.1] - 2026-08-20
 
 ### Corrigé

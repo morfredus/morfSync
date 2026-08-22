@@ -21,6 +21,15 @@ find_package(Threads REQUIRED)
 # Cœur portable : serveur HTTP minimal + journal de synchro + config.
 # Aucune dépendance à un framework web. Réutilisable par des tests/outils.
 # =====================================================================
+# --- Enregistrement des compilations (best-effort) ------------------------
+# Chronometre le vrai travail des compilateurs et signale la duree a
+# morfAnalytics (POST /api/monitor/activity), QUEL QUE SOIT le declencheur :
+# `cmake --build` direct, `morf upgrade` ou un deploiement morfDeploy (un
+# marqueur evite le double comptage cote morfDeploy). Sans URL configuree
+# (machine hors parc), c'est un no-op silencieux. A appeler AVANT les cibles.
+include("${CMAKE_CURRENT_SOURCE_DIR}/third_party/morf/morfdeploy/record_compile.cmake")
+morf_enable_compile_recording()
+
 add_library(morfsync_core STATIC
     src/net/http_server.cpp
     src/net/beacon.cpp
@@ -41,6 +50,9 @@ endif()
 # Exécutable serveur (binaire : morfSync).
 # =====================================================================
 add_executable(morfSync src/main.cpp)
+
+# Signale la duree de compile a morfAnalytics apres le lien du binaire de service.
+morf_record_target_build(morfSync "morfSync")
 target_link_libraries(morfSync PRIVATE morfsync_core)
 target_compile_definitions(morfSync PRIVATE MS_VERSION="${MS_VERSION}")
 if(MSVC)
