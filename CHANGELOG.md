@@ -4,6 +4,15 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.4] - 2026-09-03
+
+### Changed
+
+- Re-vendored morfDeploy 0.20.5 (opt-in arm64 cross-packaging and the sysroot
+  `.shlibs` Depends resolution). The VERSION is bumped so the source tag matches
+  the rebuilt artifact after this vendored-tooling update; without it the release
+  provenance check rejects a package built past the previous tag.
+
 ## [0.7.3] - 2026-08-21
 
 ### Ajouté
