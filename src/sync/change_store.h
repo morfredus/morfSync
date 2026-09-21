@@ -59,6 +59,11 @@ public:
     // applique le last-write-wins par arrivée, signale les écrasements (§3).
     PushResult apply(const std::vector<Change>& incoming);
 
+    // Réinitialise explicitement un domaine : supprime toutes les entités et
+    // ouvre une nouvelle époque de journal, afin que les clients repartent
+    // d'une réplication complète au prochain cycle.
+    void reset();
+
 private:
     void load();
     void save() const;   // appelé sous verrou

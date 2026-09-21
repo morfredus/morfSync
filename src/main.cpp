@@ -74,6 +74,10 @@ public:
         return *it->second;
     }
 
+    void reset(const std::string& domain) {
+        store(domain).reset();
+    }
+
     // Charge au démarrage tous les journaux déjà présents sur le disque, pour
     // que /api/status les reflète et que les données survivent aux redémarrages.
     // Appelé avant le démarrage du serveur (mono-thread) : pas de verrou externe.
@@ -282,6 +286,25 @@ int main(int argc, char** argv) {
 
         json body{{"applied", applied}, {"conflicts", conflicts}, {"lastSeq", res.lastSeq}};
         return hsh::HttpResponse::json(200, body.dump());
+    });
+
+    // --- POST /api/:domain/reset : effacement explicite d'un domaine --------
+    // Action administrative volontaire : l'authentification habituelle est
+    // obligatoire si un token est configuré. Le nouveau journalId fait repartir
+    // les clients d'une réplication complète, sans toucher aux autres domaines.
+    server.route("POST", "/api/:domain/reset",
+                 [&registry, &authorized](const hsh::HttpRequest& req) {
+        if (!authorized(req))
+            return hsh::HttpResponse::json(401, R"({"error":"unauthorized"})");
+        const std::string domain = req.param("domain");
+        if (!validDomain(domain))
+            return hsh::HttpResponse::json(400, R"({"error":"invalid domain"})");
+
+        registry.reset(domain);
+        hsh::ChangeStore& store = registry.store(domain);
+        return hsh::HttpResponse::json(200,
+            json{{"status", "reset"}, {"domain", domain},
+                 {"journalId", store.journalId()}}.dump());
     });
 
     // --- Magasin de blobs : binaire des pièces jointes (adressé par contenu) --

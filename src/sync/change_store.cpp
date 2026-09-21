@@ -153,4 +153,12 @@ PushResult ChangeStore::apply(const std::vector<Change>& incoming) {
     return result;
 }
 
+void ChangeStore::reset() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    byId_.clear();
+    nextSeq_ = 0;
+    journalId_ = generateJournalId();
+    save();
+}
+
 } // namespace hsh
