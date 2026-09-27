@@ -48,20 +48,19 @@ Windows** :
 
 ### Où sont stockées les données par défaut
 
-Si `dataDir` n'est pas précisé, morfSync range ses données selon la convention
-morfSystem (voir [FILESYSTEM.md](https://github.com/morfredus/morfSystem/blob/main/docs/FILESYSTEM.md)),
-sous `<app_dir>/data` :
+Si `dataDir` n'est pas précisé, morfSync range ses données dans son dossier
+d'état, selon la convention morfSystem (voir [FILESYSTEM.md](FILESYSTEM.md)) :
 
 | Système | Emplacement des données |
 |---------|-------------------------|
-| Linux | `/opt/morfsync/data` |
-| Windows | `%ProgramData%\morfsync\data` |
+| Linux | `/var/lib/morfsystem/morfsync` (`$STATE_DIRECTORY`, créé par systemd) |
+| Windows | `%ProgramData%\morfsystem\morfsync\state` |
 
 morfSync est un **service**, pas une application utilisateur : ces fichiers sont
 sa source de vérité et personne ne les ouvre à la main. Toutes les opérations
 (consultation, suppression) passent par les **consommateurs** via le réseau. Le
 compte sous lequel tourne le service doit avoir l'écriture sur ce dossier
-(provisionné par `service.py install`) ; morfSync vérifie la créabilité et
+(sous Linux, systemd s'en charge via `StateDirectory=`) ; morfSync vérifie la créabilité et
 l'écriture au démarrage, affiche le dossier retenu dans le journal, et les
 données **survivent aux redémarrages** (le hub recharge les domaines existants au
 lancement).
@@ -121,8 +120,8 @@ sudo systemctl enable --now morfsync                       # nom en minuscules
 > `systemctl start MorfSync` (mauvaise casse) échouera (« Unit not found »).
 
 Le service tourne **en tant que votre utilisateur** (`User=`) ; ses données vont
-dans `/opt/morfsync/data` (voir §1). `service.py install` provisionne le dossier
-et les droits automatiquement.
+dans `/var/lib/morfsystem/morfsync` (voir §1). systemd crée ce dossier et le donne
+à l'utilisateur du service (`StateDirectory=`) : rien à provisionner à la main.
 
 ### Piloter le service
 

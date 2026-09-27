@@ -1,5 +1,5 @@
 /**
- * main.cpp — morfSync : point d'entrée.
+ * main.cpp - morfSync : point d'entrée.
  *
  * Câble les endpoints du contrat de synchronisation (docs/sync-contract.md §4)
  * au serveur HTTP minimal et au journal de changements. Le hub reste agnostique
@@ -312,7 +312,7 @@ int main(int argc, char** argv) {
     // la référence de hash) ; le contenu voyage ici, à la demande, une seule fois
     // par hash. Adressage par contenu = idempotence et dédoublonnage naturels.
 
-    // HEAD /api/blob/:hash — présence, sans corps. Permet à un client de ne
+    // HEAD /api/blob/:hash - présence, sans corps. Permet à un client de ne
     // téléverser que les blobs que le hub n'a pas déjà.
     server.route("HEAD", "/api/blob/:hash",
                  [&blobs, &authorized](const hsh::HttpRequest& req) {
@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
         return r;  // corps vide : c'est une requête de présence
     });
 
-    // GET /api/blob/:hash — télécharger le contenu.
+    // GET /api/blob/:hash - télécharger le contenu.
     server.route("GET", "/api/blob/:hash",
                  [&blobs, &authorized](const hsh::HttpRequest& req) {
         if (!authorized(req))
@@ -345,7 +345,7 @@ int main(int argc, char** argv) {
         return r;
     });
 
-    // PUT /api/blob/:hash — téléverser le contenu. Idempotent : un blob déjà
+    // PUT /api/blob/:hash - téléverser le contenu. Idempotent : un blob déjà
     // présent n'est pas réécrit. Le hub ne recalcule pas le hash (clé opaque) ;
     // le client vérifie l'intégrité au téléchargement.
     server.route("PUT", "/api/blob/:hash",
@@ -365,7 +365,7 @@ int main(int argc, char** argv) {
     });
 
     std::cout << "morfSync " << MS_VERSION
-              << " — écoute sur http://" << cfg.host << ":" << cfg.port << "\n"
+              << " - écoute sur http://" << cfg.host << ":" << cfg.port << "\n"
               << "  données   : " << std::filesystem::absolute(cfg.dataDir).string() << "\n"
               << "  domaines  : " << preloaded << " chargé(s) au démarrage\n"
               << "  auth      : " << (cfg.token.empty() ? "désactivée" : "Bearer") << std::endl;

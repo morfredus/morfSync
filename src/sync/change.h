@@ -1,5 +1,5 @@
 /**
- * change.h — L'enveloppe de synchronisation.
+ * change.h - L'enveloppe de synchronisation.
  *
  * morfSync est volontairement AGNOSTIQUE au métier : il ne connaît ni les
  * composants de ComponentHub, ni les mesures de MeteoHub. Il ne manipule que
@@ -23,8 +23,8 @@ struct Change {
     bool         deleted = false;// tombstone
     std::int64_t rev = 0;        // révision locale, incrémentée par le client à chaque save
     std::string  origin;         // deviceId ayant produit cette révision
-    std::string  createdAt;      // ISO 8601 UTC — affichage seulement
-    std::string  updatedAt;      // ISO 8601 UTC — affichage seulement
+    std::string  createdAt;      // ISO 8601 UTC - affichage seulement
+    std::string  updatedAt;      // ISO 8601 UTC - affichage seulement
     nlohmann::json data;         // charge utile métier, opaque pour le hub
 
     // Sérialisation vers le format d'échange / de stockage (identiques).

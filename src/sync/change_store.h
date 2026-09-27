@@ -1,5 +1,5 @@
 /**
- * change_store.h — Le journal ordonné d'un domaine (cœur du protocole).
+ * change_store.h - Le journal ordonné d'un domaine (cœur du protocole).
  *
  * Un ChangeStore = un domaine (componenthub, meteohub…). Il détient l'unique
  * numéro de séquence monotone qui ORDONNE et ARBITRE tout (docs/sync-contract.md

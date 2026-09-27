@@ -1,9 +1,9 @@
 /**
- * beacon.h — émetteur morfbeacon/1, sans dépendance.
+ * beacon.h - émetteur morfbeacon/1, sans dépendance.
  *
  * morfSync est le premier service du parc : il précède le protocole que les
  * autres respectent, et il est resté invisible dans l'onglet Écosystème de
- * morfMonitor — non pas en panne, jamais découvert.
+ * morfMonitor - non pas en panne, jamais découvert.
  *
  * Pourquoi ne PAS vendoriser morfBeacon ici, alors que tous les autres le font.
  * morfBeacon exige Qt6 Core et Network. morfSync n'a aucune dépendance Qt : il

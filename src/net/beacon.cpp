@@ -1,5 +1,5 @@
 /**
- * beacon.cpp — implémentation de l'émetteur morfbeacon/1.
+ * beacon.cpp - implémentation de l'émetteur morfbeacon/1.
  *
  * Voir beacon.h pour la raison de ne pas vendoriser morfBeacon ici.
  */

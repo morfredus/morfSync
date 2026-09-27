@@ -1,5 +1,5 @@
 /**
- * config.h — Configuration du serveur, lue depuis config.json.
+ * config.h - Configuration du serveur, lue depuis config.json.
  *
  * config.json contient le jeton d'authentification : il est gitignore
  * (voir .gitignore). Un modèle sans secret est fourni : config.example.json.

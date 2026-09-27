@@ -1,5 +1,5 @@
 /**
- * http_server.h — Serveur HTTP/1.1 minimal, sans dépendance externe.
+ * http_server.h - Serveur HTTP/1.1 minimal, sans dépendance externe.
  *
  * Volontairement minuscule : morfSync est un hub LAN privé dont on écrit
  * aussi les clients. On n'a besoin ni de TLS, ni de keep-alive, ni de HTTP/2.

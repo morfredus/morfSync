@@ -1,5 +1,5 @@
 /**
- * blob_store.h — Magasin de blobs adressé par contenu.
+ * blob_store.h - Magasin de blobs adressé par contenu.
  *
  * Un blob = un fichier nommé par le hash (SHA-256, 64 hex) de son contenu, rangé
  * sous {dataDir}/blobs/. Sert à transporter le BINAIRE des pièces jointes entre

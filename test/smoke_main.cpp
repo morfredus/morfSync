@@ -1,5 +1,5 @@
 /**
- * smoke_main.cpp — Test de fumée headless du journal (aucun réseau).
+ * smoke_main.cpp - Test de fumée headless du journal (aucun réseau).
  *
  * Vérifie les invariants du contrat : attribution de seq monotone, last-write-wins
  * par id, détection d'écrasement (conflit), pagination du PULL et persistance.

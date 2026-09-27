@@ -1,5 +1,5 @@
 /**
- * paths.h — Emplacement de stockage des données du service.
+ * paths.h - Emplacement de stockage des données du service.
  *
  * morfSync est un service, pas une application utilisateur : ses données
  * (journaux de synchro par domaine) sont sa source de vérité, et personne ne les

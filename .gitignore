@@ -147,3 +147,6 @@ Desktop.ini
 # NB : resources/app.ico et resources/logo.png SONT versionnés (nécessaires au
 # build de l'icône). config.example.json l'est aussi (modèle sans secret).
 # -----------------------------------------------------------------------------
+
+# Secrets locaux : jamais versionnes
+secrets.json

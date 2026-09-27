@@ -4,6 +4,26 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.6] - 2026-09-27
+
+### Changed
+
+- Re-vendored morfDeploy to 0.20.7 (dead-code removal and punctuation only; no
+  behaviour change).
+
+## [0.7.5] - 2026-09-27
+
+### Fixed
+
+- **`docs/INSTALLATION.md` still placed data under `/opt/morfsync/data`.** Since
+  0.5.0 the default is the state directory (`/var/lib/morfsystem/morfsync` via
+  `StateDirectory=`, `%ProgramData%\morfsystem\morfsync\state` on Windows), as
+  `docs/FILESYSTEM.md` and `src/app/paths.cpp` already said.
+
+### Changed
+
+- Em dashes replaced by `-` in the project's own files.
+
 ## [0.7.4] - 2026-09-03
 
 ### Changed
