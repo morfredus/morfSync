@@ -4,6 +4,18 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.9] - 2026-10-10
+
+### Changed
+
+- Resync the vendored morfDeploy (0.21.2): `config push` skips identical files.
+
+## [0.7.8] - 2026-10-10
+
+### Changed
+
+- Resync the vendored morfDeploy (0.21.1): `install`/`update` now copy `VERSION` next to the binary.
+
 ## [0.7.7] - 2026-09-29
 
 ### Changed
