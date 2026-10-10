@@ -30,8 +30,9 @@ Group=__RUN_USER__
 # SYSTEM avec User=, systemd ne fournit pas toujours $HOME, et %h vaudrait /root.
 # Les données ne dépendent plus de $HOME (elles vivent sous /opt/morfsync/data),
 # mais un HOME défini reste sain pour l'environnement du processus.
-Environment=HOME=__RUN_HOME__
-WorkingDirectory=__RUN_HOME__
+# Le HOME n'est plus utilise : l'etat vit sous StateDirectory (voir plus bas), et
+# ProtectHome=yes rend /home inaccessible. Le programme est son propre dossier de travail.
+WorkingDirectory=__APP_DIR__
 # Crée et possède /var/lib/morfsystem/morfsync ; expose $STATE_DIRECTORY, que
 # paths.cpp utilise comme dossier de données par défaut.
 StateDirectory=morfsystem/morfsync
@@ -39,6 +40,11 @@ ExecStart=__APP_DIR__/morfSync __CONFIG_DIR__/morfsync.json
 Restart=on-failure
 RestartSec=3
 NoNewPrivileges=yes
+# Durcissement (valide sur morfNotify, 2026-10-10) : systeme de fichiers en lecture
+# seule. morfSync n'ecrit que sous son StateDirectory (journaux, blobs).
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
 
 [Install]
 WantedBy=multi-user.target

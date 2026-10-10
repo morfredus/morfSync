@@ -4,6 +4,15 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.10] - 2026-10-10
+
+### Changed
+
+- **Hardened systemd unit**: `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`
+  (on top of `NoNewPrivileges`). `WorkingDirectory` is now the application directory and the
+  unused `HOME` is dropped: the state already lives under `StateDirectory`, and a protected
+  `/home` would otherwise prevent the start.
+
 ## [0.7.9] - 2026-10-10
 
 ### Changed
