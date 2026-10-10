@@ -98,7 +98,7 @@ sudo ./service.py install
 
 Le script : installe le binaire dans `/usr/local/bin`, crée
 `/etc/morfsystem/morfsync/config.json` (s'il n'existe pas), installe le service,
-l'active au démarrage, le lance, et teste `/api/health`.
+l'active au démarrage, le lance, et teste `/healthz`.
 
 Désinstallation :
 ```bash
@@ -189,7 +189,7 @@ sudo systemctl stop morfsync            # 5. remplacer le binaire du service
 sudo install -m 0755 build-arm64/morfSync /usr/local/bin/morfSync
 sudo systemctl restart morfsync
 
-curl http://localhost:8080/api/health        # 6. vérifier la version en service
+curl http://localhost:8080/healthz        # 6. vérifier la version en service
 ```
 
 (Sur PC x86_64 : remplacer `linux-arm64` par `linux` et `build-arm64` par `build`.)
@@ -232,7 +232,7 @@ automatiquement à l'allumage de la machine, en arrière-plan.
 Le script : copie le binaire et la config dans `C:\ProgramData\morfSync`,
 crée une tâche planifiée **`morfSync`** (démarrage automatique, compte
 SYSTEM), **ouvre le port dans le pare-feu Windows**, démarre le hub et teste
-`/api/health`.
+`/healthz`.
 
 Désinstallation :
 ```powershell
@@ -267,13 +267,13 @@ New-NetFirewallRule -DisplayName "morfSync" -Direction Inbound `
 
 Sur la machine du hub :
 ```bash
-curl http://localhost:8080/api/health
+curl http://localhost:8080/healthz
 # -> {"status":"ok","time":"...","version":"0.1.0"}
 ```
 
 Depuis un autre poste du réseau (remplacez par l'IP de la machine du hub) :
 ```bash
-curl http://192.168.1.50:8080/api/health
+curl http://192.168.1.50:8080/healthz
 ```
 Trouver l'IP : `hostname -I` (Linux) ou `ipconfig` (Windows).
 
@@ -281,7 +281,7 @@ Trouver l'IP : `hostname -I` (Linux) ou `ipconfig` (Windows).
 
 ## 5. État actuel de la communication
 
-Le hub expose déjà les endpoints de synchronisation (`/api/health`,
+Le hub expose déjà les endpoints de synchronisation (`/healthz`,
 `GET`/`POST /api/{domaine}/changes`, voir [sync-contract.md](sync-contract.md)),
 testables avec `curl` ou un navigateur.
 

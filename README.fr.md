@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.7.10-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.11-blue)](CHANGELOG.md)
 
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Raspberry%20Pi-lightgrey)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus)
@@ -33,7 +33,7 @@ RTC). La spécification complète est dans [docs/sync-contract.md](docs/sync-con
 
 | Méthode | Endpoint | Rôle |
 |---------|----------|------|
-| `GET`  | `/api/health` | État du serveur (ouvert, sans auth) |
+| `GET`  | `/healthz` | État du serveur (ouvert, sans auth) ; `/api/health` conservé en alias |
 | `GET`  | `/api/status` | Domaines connus : entités, curseur `lastSeq` et `journalId` (époque) |
 | `GET`  | `/api/{domaine}/changes?since=N&limit=M` | PULL des changements depuis le curseur |
 | `POST` | `/api/{domaine}/changes` | PUSH des changements locaux, récupère le `seq` attribué |
@@ -91,7 +91,7 @@ ctest --preset linux
 cp config.example.json config.json    # puis renseigner un token si souhaité
 ./morfSync                       # ou : ./morfSync /chemin/config.json
 ```
-Vérification rapide : `curl http://localhost:8080/api/health`
+Vérification rapide : `curl http://localhost:8080/healthz`
 
 **Installation en service / démarrage automatique** (Linux et Windows),
 configuration de l'écoute (adresse/port), pare-feu : voir

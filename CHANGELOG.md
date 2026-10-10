@@ -4,6 +4,14 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.7.11] - 2026-10-10
+
+### Added
+
+- **`GET /healthz`**, the parc-wide health route (contract: `/status` + `/healthz`). Same body as
+  before (status, time, version). `/api/health` stays as an alias for existing clients. Docs
+  now name `/healthz`.
+
 ## [0.7.10] - 2026-10-10
 
 ### Changed

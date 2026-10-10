@@ -115,16 +115,16 @@ la suite.
 **Vérification - au terminal (fonctionne partout, même sur un Raspberry sans
 écran) :** dans le second terminal, tapez :
 ```bash
-curl http://localhost:8080/api/health
+curl http://localhost:8080/healthz
 ```
 Vous devez voir : `{"status":"ok", ...}`. Si oui, tout va bien.
 
 > *Alternative si la machine a un navigateur* (poste de bureau) : ouvrez
-> `http://localhost:8080/api/health`. Sur un Raspberry « headless » (sans
+> `http://localhost:8080/healthz`. Sur un Raspberry « headless » (sans
 > écran), restez sur `curl`.
 >
 > *Pas de `curl` ?* Sous Linux : `sudo apt install curl`. Sinon, en pur
-> terminal, `wget -qO- http://localhost:8080/api/health` fait la même chose.
+> terminal, `wget -qO- http://localhost:8080/healthz` fait la même chose.
 
 Pour arrêter le hub dans ce mode manuel : revenez au premier terminal et faites
 **Ctrl + C**.
@@ -162,7 +162,7 @@ Remplacez `192.168.1.50` par l'**IP de la machine hub** (étape 1).
 
 **5.a - Le hub répond-il depuis l'autre poste ?**
 ```bash
-curl http://192.168.1.50:8080/api/health
+curl http://192.168.1.50:8080/healthz
 ```
 Réponse attendue : `{"status":"ok", ...}`.
 Si ça bloque → voir la section « Ça ne marche pas » plus bas (souvent le pare-feu).
@@ -203,7 +203,7 @@ Puis **redémarrez** :
 
 Si vous mettez un `token`, les clients devront ajouter l'en-tête
 `-H "Authorization: Bearer un-mot-de-passe-partage"` à leurs requêtes (sauf
-`/api/health` qui reste ouvert).
+`/healthz` qui reste ouvert).
 
 ---
 

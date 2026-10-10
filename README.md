@@ -2,7 +2,7 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
-[![Version](https://img.shields.io/badge/version-0.7.10-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.11-blue)](CHANGELOG.md)
 
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Raspberry%20Pi-lightgrey)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus)
@@ -32,7 +32,7 @@ full specification lives in [docs/sync-contract.md](docs/sync-contract.md).
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET`  | `/api/health` | Server status (open, no auth) |
+| `GET`  | `/healthz` | Server status (open, no auth); `/api/health` kept as an alias |
 | `GET`  | `/api/status` | Known domains: entities, `lastSeq` cursor and `journalId` (epoch) |
 | `GET`  | `/api/{domain}/changes?since=N&limit=M` | PULL changes since cursor |
 | `POST` | `/api/{domain}/changes` | PUSH local changes, get assigned `seq` |
@@ -90,7 +90,7 @@ ctest --preset linux
 cp config.example.json config.json    # then set a token if desired
 ./morfSync                       # or: ./morfSync /path/to/config.json
 ```
-Quick check: `curl http://localhost:8080/api/health`
+Quick check: `curl http://localhost:8080/healthz`
 
 **Install as a service / auto-start** (Linux and Windows), listen configuration
 (host/port), firewall: see [docs/INSTALLATION.md](docs/INSTALLATION.md). Absolute

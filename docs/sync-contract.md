@@ -121,9 +121,10 @@ Tous les corps sont en JSON UTF-8.
 
 ### 4.1 État du serveur
 ```
-GET /api/health
+GET /healthz
 → 200 { "status": "ok", "time": "2026-07-14T12:00:00Z", "version": "1.0.0" }
 ```
+`/api/health` répond à l'identique (alias conservé pour les anciens clients ; `/healthz` est le nom du parc).
 Utilisé par « tester la connexion » et « voir l'état du serveur » dans les préférences client.
 
 ### 4.2 PULL - récupérer les changements
@@ -160,7 +161,7 @@ body { "deviceId": "windows-fred",
 
 ### 4.4 Ordre d'une session de synchro
 ```
-1. GET /api/health              → serveur joignable ?
+1. GET /healthz              → serveur joignable ?
 2. PUSH mes changements locaux  → j'envoie d'abord ce que j'ai fait hors ligne
 3. PULL depuis lastSeq          → je récupère le reste (dont mes propres changements ré-ordonnés)
 4. Applique le PULL localement, mets à jour lastSeq
@@ -275,7 +276,7 @@ il pose `deleted=true` au lieu d'effacer. `save()` incrémente `rev` et `updated
 ### 6.4 Boucle de synchro (pseudocode, côté client)
 ```
 function sync(domain):
-    if not GET /health: return            # offline → on ne fait rien, l'app continue
+    if not GET /healthz: return            # offline → on ne fait rien, l'app continue
     local  = storage.findChangedSince(cursor.pushWatermark)
     resp   = POST /{domain}/changes { deviceId, changes: local }
     for c in resp.conflicts: log("écrasé:", c.id)   # visibilité, pas de blocage

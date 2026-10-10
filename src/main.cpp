@@ -218,11 +218,16 @@ int main(int argc, char** argv) {
         return hsh::HttpResponse::json(200, body.dump());
     });
 
-    // --- GET /api/health : état du serveur (ouvert, sans auth) --------------
-    server.route("GET", "/api/health", [](const hsh::HttpRequest&) {
+    // --- GET /healthz : état du serveur (ouvert, sans auth) ------------------
+    // Nom canonique du parc (contrat morfSystem : /status + /healthz). Le corps reste
+    // riche (heure, version) : ComponentHub en lit la version pour son test de
+    // connexion. /api/health est conservé comme ALIAS pour les anciens clients.
+    auto health = [](const hsh::HttpRequest&) {
         json body{{"status", "ok"}, {"time", nowIso8601Utc()}, {"version", MS_VERSION}};
         return hsh::HttpResponse::json(200, body.dump());
-    });
+    };
+    server.route("GET", "/healthz", health);
+    server.route("GET", "/api/health", health);
 
     // --- GET /api/status : domaines connus + nb d'entités + curseur ---------
     server.route("GET", "/api/status", [&registry](const hsh::HttpRequest&) {
