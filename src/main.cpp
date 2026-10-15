@@ -112,6 +112,41 @@ private:
     std::map<std::string, std::unique_ptr<hsh::ChangeStore>> stores_;
 };
 
+// Activité de synchronisation (contrat générique `activity/1`). Le hub est passif :
+// il ne « lance » aucune synchro, ce sont les clients (ComponentHub...) qui poussent
+// et tirent. On déclare donc une activité tant que des requêtes de synchro arrivent
+// en rafale : une rafale se termine après kQuietS secondes sans requête. C'est ce
+// que le hub observe réellement, sans prétendre connaître le travail du client.
+class SyncActivity {
+public:
+    void touch(const std::string& domain) {
+        const std::time_t now = std::time(nullptr);
+        std::lock_guard<std::mutex> lock(m_);
+        if (now - last_ > kQuietS) {      // nouvelle rafale
+            start_ = now;
+            count_ = 0;
+        }
+        last_ = now;
+        ++count_;
+        if (!domain.empty()) domain_ = domain;
+    }
+    // Objet JSON `activity`, ou null si aucune rafale en cours.
+    nlohmann::json json() {
+        std::lock_guard<std::mutex> lock(m_);
+        if (last_ == 0 || std::time(nullptr) - last_ > kQuietS) return nullptr;
+        std::string detail = std::to_string(count_) + " requêtes";
+        if (!domain_.empty()) detail = domain_ + " - " + detail;
+        return {{"type", "synchronisation"}, {"state", "running"},
+                {"started_at", static_cast<long long>(start_)}, {"detail", detail}};
+    }
+private:
+    static constexpr int kQuietS = 10;
+    std::mutex   m_;
+    std::time_t  start_ = 0, last_ = 0;
+    long long    count_ = 0;
+    std::string  domain_;
+};
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -174,10 +209,13 @@ int main(int argc, char** argv) {
     hsh::HttpServer server(cfg.host, cfg.port);
 
     // Vérifie le Bearer partagé si un token est configuré. Renvoie true si OK.
-    auto authorized = [&cfg](const hsh::HttpRequest& req) {
-        if (cfg.token.empty()) return true; // auth désactivée (LAN de confiance)
-        const std::string h = req.header("authorization");
-        return h == "Bearer " + cfg.token;
+    SyncActivity activity;
+    auto authorized = [&cfg, &activity](const hsh::HttpRequest& req) {
+        if (!cfg.token.empty() && req.header("authorization") != "Bearer " + cfg.token)
+            return false;
+        // Toutes les routes de synchro passent ici : une requête acceptée = activité.
+        activity.touch(req.param("domain"));
+        return true;                        // auth désactivée (LAN de confiance) ou OK
     };
 
     // --- Annonce de présence sur le LAN ------------------------------------
@@ -199,7 +237,7 @@ int main(int argc, char** argv) {
     // celui-là aux clients de synchronisation. Les deux vivent côte à côte
     // plutôt que l'un remplaçant l'autre, parce que des consommateurs
     // existants appellent déjà /api/status.
-    server.route("GET", "/status", [&beacon, &registry](const hsh::HttpRequest&) {
+    server.route("GET", "/status", [&beacon, &registry, &activity](const hsh::HttpRequest&) {
         json body = json::parse(beacon.identityJson(beacon.uptimeSeconds()));
 
         // « proto » ne désigne PAS la même chose dans les deux documents, et
@@ -215,6 +253,8 @@ int main(int argc, char** argv) {
         // Le heartbeat reste court ; le détail vit ici. « Push presence,
         // pull detail. »
         body["metrics"] = {{"domains", registry.statusJson().size()}};
+        const json act = activity.json();
+        if (!act.is_null()) body["activity"] = act;
         return hsh::HttpResponse::json(200, body.dump());
     });
 

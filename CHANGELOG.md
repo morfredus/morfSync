@@ -4,6 +4,14 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.8.0] - 2026-10-15
+
+### Added
+
+- `/status` declares the synchronisation activity (`activity/1`, type `synchronisation`):
+  the hub is passive, so a burst of accepted sync requests (pull, push, blobs) counts as
+  running until 10 s pass without any. Shown by morfMonitor in "Activités en cours".
+
 ## [0.7.11] - 2026-10-10
 
 ### Added
