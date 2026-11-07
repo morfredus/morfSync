@@ -15,6 +15,7 @@
 #include <vector>
 #include <functional>
 #include <atomic>
+#include <cstddef>
 
 namespace hsh {
 
@@ -74,6 +75,7 @@ private:
     long long listenFd_ = -1;   // SOCKET (Windows) ou int (POSIX), stocké en 64 bits
     std::vector<Route> routes_;
     std::atomic<bool> running_{false};
+    std::atomic<int>  activeConns_{0};   // connexions en cours (plafonnees)
 };
 
 } // namespace hsh

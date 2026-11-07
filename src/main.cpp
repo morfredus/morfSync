@@ -74,8 +74,8 @@ public:
         return *it->second;
     }
 
-    void reset(const std::string& domain) {
-        store(domain).reset();
+    bool reset(const std::string& domain) {
+        return store(domain).reset();
     }
 
     // Charge au démarrage tous les journaux déjà présents sur le disque, pour
@@ -245,8 +245,8 @@ int main(int argc, char** argv) {
         //   heartbeat  proto = "morfbeacon/1"  → le protocole de transport,
         //                                        identique pour tout le monde
         //   /status    proto = "morfsync/1"    → la version de CE document
-        // morfMonitor sert « morfmonitor/1 », morfTemplateService
-        // « morftemplate/1 ». Laisser « morfbeacon/1 » ici annoncerait un
+        // chaque service sert son propre « morfXxx/1 » (par exemple
+        // « morfmonitor/1 »). Laisser « morfbeacon/1 » ici annoncerait un
         // datagramme de présence là où l'on sert un document de statut.
         body["proto"] = "morfsync/1";
 
@@ -315,12 +315,21 @@ int main(int argc, char** argv) {
                 json{{"error", std::string("invalid json: ") + e.what()}}.dump());
         }
 
+        // Un champ mal type (rev en chaine, data absent...) leve json::exception : c'est une
+        // erreur du client (400), pas une panne du hub (500).
         std::vector<hsh::Change> incoming;
-        if (in.contains("changes") && in["changes"].is_array())
-            for (const auto& item : in["changes"])
-                incoming.push_back(hsh::Change::fromJson(item));
+        try {
+            if (in.is_object() && in.contains("changes") && in["changes"].is_array())
+                for (const auto& item : in["changes"])
+                    incoming.push_back(hsh::Change::fromJson(item));
+        } catch (const json::exception& e) {
+            return hsh::HttpResponse::json(400,
+                json{{"error", std::string("invalid change: ") + e.what()}}.dump());
+        }
 
         hsh::PushResult res = registry.store(domain).apply(incoming);
+        if (!res.persisted)
+            return hsh::HttpResponse::json(500, R"({"error":"journal write failed"})");
 
         json applied = json::array();
         for (const auto& [id, seq] : res.applied)
@@ -345,7 +354,8 @@ int main(int argc, char** argv) {
         if (!validDomain(domain))
             return hsh::HttpResponse::json(400, R"({"error":"invalid domain"})");
 
-        registry.reset(domain);
+        if (!registry.reset(domain))
+            return hsh::HttpResponse::json(500, R"({"error":"journal write failed"})");
         hsh::ChangeStore& store = registry.store(domain);
         return hsh::HttpResponse::json(200,
             json{{"status", "reset"}, {"domain", domain},

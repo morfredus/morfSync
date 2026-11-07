@@ -97,8 +97,46 @@ const char* statusText(int code) {
         case 405: return "Method Not Allowed";
         case 413: return "Payload Too Large";
         case 500: return "Internal Server Error";
+        case 503: return "Service Unavailable";
         default:  return "OK";
     }
+}
+
+// Plafonds de protection du Pi (1 Go de RAM) : le corps est lu d'un bloc en memoire AVANT
+// l'authentification, un Content-Length demesure suffirait a le faire tomber (OOM).
+constexpr std::size_t kMaxBodyBytes     = 64ull * 1024 * 1024;  // egal au plafond des blobs
+constexpr std::size_t kMaxHeaderBytes   = 64 * 1024;
+constexpr int         kMaxActiveConns   = 64;
+constexpr int         kSocketTimeoutMs  = 10000;  // un client muet ne retient pas un thread
+
+// Delai de lecture/ecriture : sans lui, une connexion ouverte puis laissee silencieuse
+// garde son thread (et sa memoire) indefiniment.
+void setSocketTimeouts(socket_t fd) {
+#if defined(_WIN32)
+    const DWORD ms = kSocketTimeoutMs;
+    ::setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&ms), sizeof(ms));
+    ::setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<const char*>(&ms), sizeof(ms));
+#else
+    timeval tv{};
+    tv.tv_sec = kSocketTimeoutMs / 1000;
+    ::setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    ::setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#endif
+}
+
+// MSG_NOSIGNAL : un client parti pendant l'ecriture ne doit pas tuer le hub par SIGPIPE.
+#if defined(MSG_NOSIGNAL)
+constexpr int kSendFlags = MSG_NOSIGNAL;
+#else
+constexpr int kSendFlags = 0;
+#endif
+
+// Reponse minimale sans corps, pour les refus emis avant tout routage.
+void sendBare(socket_t fd, const char* statusLine) {
+    std::string r = "HTTP/1.1 ";
+    r += statusLine;
+    r += "\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+    ::send(fd, r.data(), static_cast<int>(r.size()), kSendFlags);
 }
 
 } // namespace
@@ -208,6 +246,15 @@ bool HttpServer::run() {
             if (!running_) break;
             continue;
         }
+        setSocketTimeouts(client);
+        // Plafond de connexions simultanees : au-dela, refus immediat plutot qu'un thread
+        // de plus (un thread par connexion, sinon illimite).
+        if (activeConns_.fetch_add(1) >= kMaxActiveConns) {
+            activeConns_.fetch_sub(1);
+            sendBare(client, "503 Service Unavailable");
+            closeSocket(client);
+            continue;
+        }
         std::thread(&HttpServer::handleConnection, this,
                     static_cast<long long>(client)).detach();
     }
@@ -224,6 +271,11 @@ void HttpServer::stop() {
 
 void HttpServer::handleConnection(long long clientFd) {
     socket_t fd = static_cast<socket_t>(clientFd);
+    // Libere le compteur de connexions sur TOUTE sortie (returns multiples).
+    struct ConnGuard {
+        std::atomic<int>& n;
+        ~ConnGuard() { n.fetch_sub(1); }
+    } guard{activeConns_};
 
     // 1) Lire jusqu'à la fin des en-têtes (\r\n\r\n).
     std::string buffer;
@@ -233,7 +285,7 @@ void HttpServer::handleConnection(long long clientFd) {
         int n = ::recv(fd, chunk, sizeof(chunk), 0);
         if (n <= 0) { closeSocket(fd); return; }
         buffer.append(chunk, static_cast<std::size_t>(n));
-        if (buffer.size() > 8 * 1024 * 1024) { closeSocket(fd); return; } // garde-fou en-têtes
+        if (buffer.size() > kMaxHeaderBytes) { closeSocket(fd); return; } // garde-fou en-têtes
     }
 
     // 2) Parser la ligne de requête + les en-têtes.
@@ -267,6 +319,13 @@ void HttpServer::handleConnection(long long clientFd) {
     if (auto it = req.headers.find("content-length"); it != req.headers.end())
         contentLength = static_cast<std::size_t>(std::strtoul(it->second.c_str(), nullptr, 10));
 
+    // Plafond AVANT de lire (et d'allouer) le corps : repond 413 sans l'avoir recu.
+    if (contentLength > kMaxBodyBytes) {
+        sendBare(fd, "413 Payload Too Large");
+        closeSocket(fd);
+        return;
+    }
+
     req.body = buffer.substr(bodyStart);
     while (req.body.size() < contentLength) {
         int n = ::recv(fd, chunk, sizeof(chunk), 0);
@@ -291,7 +350,9 @@ void HttpServer::handleConnection(long long clientFd) {
             try {
                 resp = r.handler(req);
             } catch (const std::exception& e) {
-                resp = HttpResponse::json(500, std::string("{\"error\":\"") + e.what() + "\"}");
+                // Message fixe : e.what() n'est pas echappe (JSON invalide) et peut reveler des chemins.
+                (void)e;
+                resp = HttpResponse::json(500, "{\"error\":\"internal error\"}");
             }
             matched = true;
             break;
@@ -315,7 +376,7 @@ void HttpServer::handleConnection(long long clientFd) {
     std::size_t sent = 0;
     while (sent < payload.size()) {
         int n = ::send(fd, payload.data() + sent,
-                       static_cast<int>(payload.size() - sent), 0);
+                       static_cast<int>(payload.size() - sent), kSendFlags);
         if (n <= 0) break;
         sent += static_cast<std::size_t>(n);
     }

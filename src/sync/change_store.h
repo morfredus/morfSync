@@ -39,6 +39,7 @@ struct PushResult {
     std::vector<std::pair<std::string, std::int64_t>> applied; // (id, seq attribué)
     std::vector<Conflict> conflicts;
     std::int64_t lastSeq = 0;
+    bool persisted = true;   // false : ecriture disque echouee, lot annule (l'appelant repond 500)
 };
 
 class ChangeStore {
@@ -62,11 +63,12 @@ public:
     // Réinitialise explicitement un domaine : supprime toutes les entités et
     // ouvre une nouvelle époque de journal, afin que les clients repartent
     // d'une réplication complète au prochain cycle.
-    void reset();
+    // Retourne false si l ecriture disque echoue (l etat precedent est alors restaure).
+    bool reset();
 
 private:
     void load();
-    void save() const;   // appelé sous verrou
+    bool save() const;   // appelé sous verrou ; false si le disque a refusé l écriture
 
     std::string domain_;
     std::string journalId_;   // identité stable du journal (« époque »)

@@ -4,6 +4,29 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.8.3] - 2026-11-07
+
+### Changed
+
+- Removed leftover references to the service skeleton (docs, comments, scripts).
+
+## [0.8.2] - 2026-11-07
+
+### Fixed
+
+- The change journal write is now checked: a failed write (full disk) removes the temporary file,
+  keeps the previous journal, rolls the batch back in memory and answers `500` instead of replacing
+  the journal with a truncated file. The in-place copy fallback is gone.
+- An unreadable journal is renamed to `<domain>.json.corrupt` instead of starting empty and being
+  overwritten.
+- `Content-Length` above 64 MiB is refused with `413` before the body is read; headers are capped
+  at 64 KiB; sockets get a 10 s receive/send timeout; at most 64 connections run at once (`503`
+  beyond).
+- `~Beacon`/`stop()` always join the thread (`std::terminate` when the UDP socket could not open).
+- A badly typed change in a push is a `400`, not a `500`; internal errors no longer echo
+  `what()` into unescaped JSON.
+- `send()` uses `MSG_NOSIGNAL` on Linux (no SIGPIPE when a client leaves mid-reply).
+
 ## [0.8.1] - 2026-11-02
 
 ### Fixed

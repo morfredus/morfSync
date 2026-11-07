@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <filesystem>
+#include <optional>
 #include <random>
 #include <cstdio>
 #include <cstdint>
@@ -35,24 +36,39 @@ void ChangeStore::load() {
     std::ifstream in(filePath_);
     if (!in.is_open()) return; // journal neuf : rien à charger
 
-    nlohmann::json j;
     try {
+        nlohmann::json j;
         in >> j;
-    } catch (const std::exception&) {
-        return; // fichier corrompu : on repart d'un journal vide plutôt que de crasher
-    }
-
-    nextSeq_ = j.value("nextSeq", static_cast<std::int64_t>(0));
-    journalId_ = j.value("journalId", std::string());
-    if (j.contains("changes") && j["changes"].is_array()) {
-        for (const auto& item : j["changes"]) {
-            Change c = Change::fromJson(item);
-            if (!c.id.empty()) byId_[c.id] = c;
+        const std::int64_t nextSeq = j.value("nextSeq", static_cast<std::int64_t>(0));
+        const std::string journalId = j.value("journalId", std::string());
+        std::unordered_map<std::string, Change> loaded;
+        if (j.contains("changes") && j["changes"].is_array()) {
+            for (const auto& item : j["changes"]) {
+                Change c = Change::fromJson(item);
+                if (!c.id.empty()) loaded[c.id] = c;
+            }
         }
+        nextSeq_ = nextSeq;
+        journalId_ = journalId;
+        byId_ = std::move(loaded);
+    } catch (const std::exception&) {
+        // Fichier illisible : ne PAS repartir d'un journal vide en l'ecrasant au prochain
+        // save (domaine perdu). Le mettre de cote en .corrupt pour une reprise manuelle ;
+        // un nouveau journalId est emis par le constructeur, les clients se resynchronisent.
+        in.close();
+        std::error_code ec;
+        const std::string corrupt = filePath_ + ".corrupt";
+        std::filesystem::remove(corrupt, ec);
+        std::filesystem::rename(filePath_, corrupt, ec);
+        std::fprintf(stderr, "[morfSync] journal illisible, mis de cote : %s\n", corrupt.c_str());
+        std::fflush(stderr);
+        nextSeq_ = 0;
+        journalId_.clear();
+        byId_.clear();
     }
 }
 
-void ChangeStore::save() const {
+bool ChangeStore::save() const {
     nlohmann::json changes = nlohmann::json::array();
     for (const auto& [id, c] : byId_) changes.push_back(c.toJson());
 
@@ -61,18 +77,27 @@ void ChangeStore::save() const {
 
     // Écriture atomique : fichier temporaire puis renommage, pour ne jamais
     // laisser un journal tronqué si le process meurt en cours d'écriture.
+    // Le flux est verifie APRES flush/fermeture : disque plein ou quota se manifestent
+    // a ce moment. En cas d'echec, le .tmp est supprime et l'ancien fichier reste en place
+    // (aucun repli en ecriture directe, qui tronquerait le journal existant).
     const std::string tmp = filePath_ + ".tmp";
-    {
-        std::ofstream out(tmp, std::ios::trunc);
-        out << j.dump(2);
-    }
     std::error_code ec;
-    std::filesystem::rename(tmp, filePath_, ec);
-    if (ec) { // rename a échoué (ex. cible ouverte) : repli en copie directe
-        std::ofstream out(filePath_, std::ios::trunc);
+    {
+        std::ofstream out(tmp, std::ios::trunc | std::ios::binary);
         out << j.dump(2);
-        std::filesystem::remove(tmp, ec);
+        out.flush();
+        if (!out.good()) {
+            out.close();
+            std::filesystem::remove(tmp, ec);
+            return false;
+        }
     }
+    std::filesystem::rename(tmp, filePath_, ec);
+    if (ec) {
+        std::filesystem::remove(tmp, ec);
+        return false;
+    }
+    return true;
 }
 
 std::int64_t ChangeStore::lastSeq() const {
@@ -112,6 +137,10 @@ PushResult ChangeStore::apply(const std::vector<Change>& incoming) {
 
     PushResult result;
     bool changed = false;
+    // Journal d'annulation : si l'ecriture disque echoue, le lot est defait pour que la
+    // memoire ne diverge pas du fichier (le client re-poussera et obtiendra de vrais seq).
+    const std::int64_t seqBefore = nextSeq_;
+    std::vector<std::pair<std::string, std::optional<Change>>> undo;
     for (Change c : incoming) {
         if (c.id.empty()) continue; // un changement sans identité est ignoré
 
@@ -140,6 +169,11 @@ PushResult ChangeStore::apply(const std::vector<Change>& incoming) {
         }
 
         c.seq = ++nextSeq_;      // le hub attribue l'ordre
+        {
+            auto prev = byId_.find(c.id);
+            undo.emplace_back(c.id, prev == byId_.end() ? std::nullopt
+                                                         : std::optional<Change>(prev->second));
+        }
         byId_[c.id] = c;         // la version (strictement) plus récente remplace
         result.applied.push_back({c.id, c.seq});
         changed = true;
@@ -149,16 +183,35 @@ PushResult ChangeStore::apply(const std::vector<Change>& incoming) {
     for (const auto& [id, c] : byId_) last = std::max(last, c.seq);
     result.lastSeq = last;
 
-    if (changed) save();
+    if (changed && !save()) {
+        for (auto it = undo.rbegin(); it != undo.rend(); ++it) {
+            if (it->second) byId_[it->first] = *it->second;
+            else byId_.erase(it->first);
+        }
+        nextSeq_ = seqBefore;
+        result.applied.clear();
+        result.persisted = false;
+        std::int64_t restored = 0;
+        for (const auto& [id, c] : byId_) restored = std::max(restored, c.seq);
+        result.lastSeq = restored;
+    }
     return result;
 }
 
-void ChangeStore::reset() {
+bool ChangeStore::reset() {
     std::lock_guard<std::mutex> lock(mutex_);
+    auto oldById = std::move(byId_);
+    const std::int64_t oldSeq = nextSeq_;
+    const std::string oldJournalId = journalId_;
     byId_.clear();
     nextSeq_ = 0;
     journalId_ = generateJournalId();
-    save();
+    if (save())
+        return true;
+    byId_ = std::move(oldById);
+    nextSeq_ = oldSeq;
+    journalId_ = oldJournalId;
+    return false;
 }
 
 } // namespace hsh

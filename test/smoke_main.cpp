@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdio>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 #include "sync/change_store.h"
@@ -88,6 +89,32 @@ int main() {
         CHECK(all.changes.size() == 2, "rechargement conserve 2 entités (A,B)");
         auto after = reloaded.apply({mk("C", 1)});
         CHECK(after.applied[0].second > all.lastSeq, "seq continue après rechargement (pas de réutilisation)");
+    }
+
+    // 9) Ecriture impossible (dossier absent = meme effet qu'un disque plein) : le lot est
+    // annule en memoire, l'erreur est remontee, rien n'est applique.
+    {
+        const std::string badFile =
+            (std::filesystem::temp_directory_path() / "hsh_absent_dir" / "x.json").string();
+        ChangeStore broken("componenthub", badFile);
+        auto r = broken.apply({mk("Z", 1)});
+        CHECK(!r.persisted, "ecriture impossible -> persisted=false");
+        CHECK(r.applied.empty() && broken.count() == 0, "ecriture impossible -> etat memoire restaure");
+        CHECK(!broken.reset(), "reset avec ecriture impossible -> false");
+    }
+
+    // 10) Journal illisible : mis de cote en .corrupt, jamais ecrase par un journal vide.
+    {
+        const std::string bad =
+            (std::filesystem::temp_directory_path() / "hsh_smoke_corrupt.json").string();
+        std::filesystem::remove(bad + ".corrupt");
+        { std::ofstream o(bad); o << "{ pas du json"; }
+        ChangeStore st("componenthub", bad);
+        CHECK(st.count() == 0, "journal illisible -> repart vide");
+        CHECK(std::filesystem::exists(bad + ".corrupt"), "journal illisible -> conserve en .corrupt");
+        CHECK(!std::filesystem::exists(bad), "journal illisible -> fichier d'origine deplace");
+        std::filesystem::remove(bad + ".corrupt");
+        std::filesystem::remove(bad);
     }
 
     std::filesystem::remove(file);

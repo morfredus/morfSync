@@ -118,11 +118,16 @@ std::string Beacon::identityJson(long long uptimeSeconds) const {
 
 void Beacon::start() {
     if (!settings_.enabled || running_.exchange(true)) return;
+    // Un thread termine seul (socket UDP impossible) reste joignable : l'ecraser sans join
+    // appellerait std::terminate.
+    if (thread_.joinable()) thread_.join();
     thread_ = std::thread([this] { loop(); });
 }
 
 void Beacon::stop() {
-    if (!running_.exchange(false)) return;
+    // Join SANS condition sur running_ : loop() le remet a false quand le socket UDP ne
+    // s'ouvre pas, et un std::thread joignable detruit sans join fait std::terminate.
+    running_ = false;
     if (thread_.joinable()) thread_.join();
 }
 
