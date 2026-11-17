@@ -4,6 +4,12 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.8.4] - 2026-11-17
+
+### Changed
+
+- Vendored morfDeploy resynchronised to 0.22.0: on Windows, the build libraries are recognised under MSYS2 (UCRT64) and verified with pacman instead of reported as "no package for this platform".
+
 ## [0.8.3] - 2026-11-07
 
 ### Changed
