@@ -4,6 +4,12 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.8.5] - 2026-11-18
+
+### Changed
+
+- Build documentation (README, beginner's guide): the MSYS2 package for nlohmann-json and the others is now `mingw-w64-ucrt-x86_64-*` (UCRT64).
+
 ## [0.8.4] - 2026-11-17
 
 ### Changed

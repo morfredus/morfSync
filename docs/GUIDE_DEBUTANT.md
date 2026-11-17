@@ -85,7 +85,7 @@ Résultat : un fichier `build-mingw\morfSync.exe`.
 
 > Si la compilation se plaint de `nlohmann_json` introuvable, c'est la seule
 > dépendance à installer (paquet ci-dessus sous Linux ; `pacman -S
-> mingw-w64-x86_64-nlohmann-json` sous MSYS2).
+> mingw-w64-ucrt-x86_64-nlohmann-json` sous MSYS2).
 
 ---
 
@@ -216,7 +216,7 @@ Si vous mettez un `token`, les clients devront ajouter l'en-tête
 | Un autre poste ne répond pas | Mauvaise IP, ou `host` mis à `127.0.0.1` | Vérifiez l'IP (`hostname -I` / `ipconfig`) et que `config.json` a `"host": "0.0.0.0"`. |
 | `impossible d'ouvrir le port 8080 (déjà utilisé ?)` | Un autre programme (ou un 2ᵉ hub) occupe le port | Changez le `port` dans `config.json`, ou fermez l'autre programme. |
 | Rien ne s'affiche / démarrage silencieux | En mode service, la sortie va dans les journaux | Linux : `journalctl -u morfsync -e`. Windows : `Get-ScheduledTask -TaskName morfSync | Get-ScheduledTaskInfo`. |
-| La compilation échoue sur `nlohmann_json` | Dépendance manquante | Linux : `sudo apt install nlohmann-json3-dev`. MSYS2 : `pacman -S mingw-w64-x86_64-nlohmann-json`. |
+| La compilation échoue sur `nlohmann_json` | Dépendance manquante | Linux : `sudo apt install nlohmann-json3-dev`. MSYS2 : `pacman -S mingw-w64-ucrt-x86_64-nlohmann-json`. |
 
 ---
 

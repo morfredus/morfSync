@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.8.4-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.8.5-blue)](CHANGELOG.md)
 
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Raspberry%20Pi-lightgrey)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus)
@@ -57,7 +57,7 @@ Nécessite CMake ≥ 3.21, un compilateur C++17 et `nlohmann_json`.
 
 ### Windows (MSYS2 / MinGW)
 ```bash
-pacman -S mingw-w64-x86_64-nlohmann-json mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+pacman -S mingw-w64-ucrt-x86_64-nlohmann-json mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
 cmake --preset mingw
 cmake --build --preset mingw
 # -> build-mingw/morfSync.exe
