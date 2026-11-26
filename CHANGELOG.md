@@ -4,6 +4,12 @@ Toutes les évolutions notables de morfSync sont consignées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/).
 
+## [0.9.1] - 2026-11-26
+
+### Fixed
+
+- Windows package workflow: `git` is installed in the MSYS2 environment and the checkout is declared safe, so the packaging can prove the state of the sources ("build provenance is dirty=None ... Refusing to package").
+
 ## [0.9.0] - 2026-11-26
 
 ### Added
